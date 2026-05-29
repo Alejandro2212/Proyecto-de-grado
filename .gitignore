@@ -1,0 +1,24 @@
+# Node
+node_modules/
+
+# React
+dist/
+
+# Java
+target/
+*.class
+
+# IntelliJ
+.idea/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Env
+.env
+
+# Mac
+.DS_Store

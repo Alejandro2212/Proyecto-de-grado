@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   RESET GENERAL
+========================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   BODY
+========================= */
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* =========================
+   LINKS
+========================= */
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+button {
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+input,
+select,
+textarea {
+  outline: none;
+  font-size: 14px;
+}
+
+/* =========================
+   FULLCALENDAR PRO
+========================= */
+
+.fc {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.fc-toolbar-title {
+  font-size: 24px !important;
+  font-weight: bold;
+  color: #0f172a;
+}
+
+.fc-button {
+  background: #0f172a !important;
+  border: none !important;
+  padding: 8px 14px !important;
+  border-radius: 10px !important;
+}
+
+.fc-button:hover {
+  background: #1e293b !important;
+}
+
+.fc-event {
+  border: none !important;
+  padding: 4px !important;
+  font-size: 13px !important;
+  cursor: pointer;
+}
+
+.fc-event:hover {
+  transform: scale(1.02);
+  transition: 0.2s;
+}
+
+.fc-daygrid-day-number {
+  color: #0f172a;
+  font-weight: bold;
+}
+
+.fc-col-header-cell {
+  background: #f8fafc;
+  padding: 10px 0;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #e2e8f0;
+}
+
+.fc-scrollgrid {
+  border-radius: 18px;
+  overflow: hidden;
+}
