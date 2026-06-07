@@ -73,7 +73,15 @@ public class UsuarioService {
 
         usuario.setNombre(dto.getNombre());
 
+        usuario.setApellido(dto.getApellido());
+
+        usuario.setTelefono(dto.getTelefono());
+
+        usuario.setCi(dto.getCi());
+
         usuario.setEmail(dto.getEmail());
+
+        
 
         usuario.setPassword(
                 passwordEncoder.encode(
@@ -84,6 +92,9 @@ public class UsuarioService {
         usuario.setRol(rol);
 
         usuario.setActivo(true);
+
+        usuario.setFechaRegistro(java.time.LocalDateTime.now());
+        
 
         Usuario nuevo =
                 usuarioRepository.save(usuario);

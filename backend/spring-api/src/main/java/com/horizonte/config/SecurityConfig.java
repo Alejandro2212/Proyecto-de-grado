@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,18 +25,18 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-    // =========================
+    // =====================================
     // PASSWORD ENCODER
-    // =========================
+    // =====================================
     @Bean
     public PasswordEncoder passwordEncoder() {
 
         return new BCryptPasswordEncoder();
     }
 
-    // =========================
-    // SECURITY FILTER
-    // =========================
+    // =====================================
+    // SECURITY FILTER CHAIN
+    // =====================================
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
@@ -45,60 +44,60 @@ public class SecurityConfig {
 
         http
 
+            // =========================
             // CSRF
+            // =========================
             .csrf(csrf -> csrf.disable())
 
+            // =========================
             // CORS
+            // =========================
             .cors(cors -> {})
 
-            // SESSIONLESS
+            // =========================
+            // SESSIONLESS JWT
+            // =========================
             .sessionManagement(session ->
                     session.sessionCreationPolicy(
                             SessionCreationPolicy.STATELESS
                     )
             )
 
-            // AUTHORIZATION
+            // =========================
+            // AUTORIZACIÓN
+            // =========================
             .authorizeHttpRequests(auth -> auth
 
-                // LOGIN
+                // ENDPOINTS PÚBLICOS
                 .requestMatchers(
-
                         "/api/auth/**",
-
-                        "/api/reservas/**"
-
-                ).permitAll()
-
-                // WEBSOCKET
-                .requestMatchers(
                         "/ws/**"
                 ).permitAll()
 
-                // ADMIN
+                // SOLO ADMINISTRADOR
                 .requestMatchers(
                         "/api/usuarios/**"
                 ).hasRole("ADMIN")
 
                 // USUARIOS AUTENTICADOS
                 .requestMatchers(
-                        "/api/reservas/**"
-                ).authenticated()
+                        "/api/reservas/**",
+                        "/api/areas/**",
+                        "/api/reportes/**",
+                        "/api/dashboard/**",
+                        "/api/ia/**",
+                        "/api/perfil/**"
+                )
+                .authenticated()
 
-                .requestMatchers(
-                        "/api/areas/**"
-                ).authenticated()
-
-                .requestMatchers(
-                        "/api/reportes/**"
-                ).authenticated()
-
-                // RESTO
+                // CUALQUIER OTRO ENDPOINT
                 .anyRequest()
                 .authenticated()
             )
 
+            // =========================
             // JWT FILTER
+            // =========================
             .addFilterBefore(
                     jwtAuthFilter,
                     UsernamePasswordAuthenticationFilter.class

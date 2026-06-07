@@ -3,75 +3,108 @@ import { obtenerPrediccionIA } from "../services/iaService";
 
 export default function IADashboard() {
 
-    const [data, setData] = useState(null);
+  const [data, setData] = useState(null);
 
-    const cargarIA = async () => {
+  const [loading, setLoading] = useState(true);
 
-        try {
+  const cargarIA = async () => {
 
-            const res = await obtenerPrediccionIA();
+    try {
 
-            setData(res);
+      const res = await obtenerPrediccionIA();
 
-        } catch (error) {
+      setData(res);
 
-            console.error(error);
-        }
-    };
+    } catch (error) {
 
-    useEffect(() => {
+      console.error(error);
 
-        cargarIA();
+    } finally {
 
-    }, []);
-
-    if (!data) {
-
-        return <h2>Cargando IA...</h2>;
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+
+    cargarIA();
+
+  }, []);
+
+  if (loading) {
 
     return (
 
-        <div className="container mt-4">
+      <div className="p-10">
 
-            <h2>Panel Inteligente IA</h2>
+        <h2 className="text-3xl font-bold">
+          Cargando IA Predictiva...
+        </h2>
 
-            <div className="card p-4 mt-3">
+      </div>
+    );
+  }
 
-                <h4>
-                    Área más usada:
-                </h4>
+  return (
 
-                <p>
-                    {data.areaMasUsada}
-                </p>
+    <div className="p-6">
 
-                <h4>
-                    Horario más usado:
-                </h4>
+      <h1 className="text-4xl font-bold mb-8">
+        Inteligencia Artificial Predictiva
+      </h1>
 
-                <p>
-                    {data.horarioMasUsado}
-                </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                <h4>
-                    Día más reservado:
-                </h4>
+        <div className="bg-white p-6 rounded-2xl shadow">
 
-                <p>
-                    {data.diaMasReservado}
-                </p>
+          <h3 className="text-xl font-bold mb-3">
+            Área Más Usada
+          </h3>
 
-                <h4>
-                    Recomendación IA:
-                </h4>
-
-                <p>
-                    {data.recomendacion}
-                </p>
-
-            </div>
+          <p className="text-3xl text-blue-600 font-bold">
+            {data.areaMasUsada}
+          </p>
 
         </div>
-    );
+
+        <div className="bg-white p-6 rounded-2xl shadow">
+
+          <h3 className="text-xl font-bold mb-3">
+            Horario Más Reservado
+          </h3>
+
+          <p className="text-3xl text-green-600 font-bold">
+            {data.horarioMasUsado}
+          </p>
+
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow">
+
+          <h3 className="text-xl font-bold mb-3">
+            Día Más Reservado
+          </h3>
+
+          <p className="text-3xl text-orange-600 font-bold">
+            {data.diaMasReservado}
+          </p>
+
+        </div>
+
+        <div className="bg-slate-900 text-white p-6 rounded-2xl shadow">
+
+          <h3 className="text-xl font-bold mb-3">
+            Recomendación IA
+          </h3>
+
+          <p className="text-lg">
+            {data.recomendacion}
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
 }

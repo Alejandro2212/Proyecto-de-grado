@@ -1,46 +1,39 @@
 package com.horizonte.controller;
 
-import com.horizonte.service.PdfService;
+import com.horizonte.service.ReporteService;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/reportes")
 @CrossOrigin("*")
 public class ReporteController {
 
-    private final PdfService pdfService;
+    private final ReporteService reporteService;
 
     public ReporteController(
-            PdfService pdfService
+            ReporteService reporteService
     ) {
-        this.pdfService = pdfService;
+        this.reporteService = reporteService;
     }
 
-    // =========================
-    // GENERAR PDF
-    // =========================
-    @GetMapping(
-            value = "/reservas",
-            produces = MediaType.APPLICATION_PDF_VALUE
-    )
-    public ResponseEntity<byte[]> generarPdfReservas() {
+    @GetMapping("/general")
+    public ResponseEntity<byte[]>
+    reporteGeneral() {
 
         byte[] pdf =
-                pdfService.generarPdfReservas();
+                reporteService
+                        .generarReporteGeneral();
 
         return ResponseEntity.ok()
 
                 .header(
                         HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=reporte_reservas.pdf"
+                        "attachment; filename=reporte.pdf"
                 )
 
                 .contentType(
@@ -49,4 +42,40 @@ public class ReporteController {
 
                 .body(pdf);
     }
+
+        @GetMapping("/area/{id}")
+        public ResponseEntity<byte[]> reporteArea(
+                @PathVariable Long id
+        ) {
+
+        byte[] pdf =
+                reporteService
+                        .generarReporteArea(id);
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=reporte-area.pdf"
+                )
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+        }
+
+        @GetMapping("/usuario/{id}")
+        public ResponseEntity<byte[]> reporteUsuario(
+                @PathVariable Long id
+        ) {
+
+        byte[] pdf =
+                reporteService
+                        .generarReporteUsuario(id);
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=reporte-usuario.pdf"
+                )
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+        }
 }

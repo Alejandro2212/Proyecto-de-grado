@@ -1,16 +1,24 @@
 package com.horizonte.dto;
 
-public class UsuarioDTO {
+public class PerfilDTO {
 
+    private Long id;
     private String nombre;
     private String apellido;
     private String email;
-    private String password;
     private String telefono;
     private String ci;
     private String rol;
 
-    public UsuarioDTO() {
+    public PerfilDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNombre() {
@@ -35,14 +43,6 @@ public class UsuarioDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getTelefono() {

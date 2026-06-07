@@ -72,6 +72,8 @@ public class AuthService {
 
         usuario.setTelefono(request.getTelefono());
 
+        usuario.setCi(request.getCi());
+
         usuario.setActivo(true);
 
         usuario.setPassword(

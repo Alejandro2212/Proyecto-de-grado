@@ -1,19 +1,247 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  Bell,
+  CheckCheck,
+  Trash2,
+  Filter
+} from "lucide-react";
 
-function NotificationBell({
+import api from "../services/api";
 
-  notifications = []
-
-}) {
+export default function NotificationBell() {
 
   const [abierto, setAbierto] =
     useState(false);
+
+  const [notificaciones,
+    setNotificaciones] =
+    useState([]);
+
+  const [filtro,
+    setFiltro] =
+    useState("TODAS");
+
+  // =========================
+  // CARGAR NOTIFICACIONES
+  // =========================
+  const cargarNotificaciones =
+    async () => {
+
+      try {
+
+        const usuarioId =
+          localStorage.getItem(
+            "usuarioId"
+          );
+
+        if (!usuarioId) return;
+
+        const response =
+          await api.get(
+            `/notificaciones/usuario/${usuarioId}`
+          );
+
+        setNotificaciones(
+          response.data
+        );
+
+      } catch (error) {
+
+        console.error(
+          "Error cargando notificaciones",
+          error
+        );
+      }
+    };
+
+  // =========================
+  // MARCAR UNA LEIDA
+  // =========================
+  const marcarLeida =
+    async (id) => {
+
+      try {
+
+        await api.put(
+          `/notificaciones/${id}/leida`
+        );
+
+        setNotificaciones(prev =>
+          prev.map(n =>
+            n.id === id
+              ? {
+                  ...n,
+                  leida: true
+                }
+              : n
+          )
+        );
+
+      } catch (error) {
+
+        console.error(error);
+      }
+    };
+
+  // =========================
+  // MARCAR TODAS LEIDAS
+  // =========================
+  const marcarTodasLeidas =
+    async () => {
+
+      try {
+
+        const usuarioId =
+          localStorage.getItem(
+            "usuarioId"
+          );
+
+        await api.put(
+          `/notificaciones/usuario/${usuarioId}/todas-leidas`
+        );
+
+        setNotificaciones(prev =>
+          prev.map(n => ({
+            ...n,
+            leida: true
+          }))
+        );
+
+      } catch (error) {
+
+        console.error(error);
+      }
+    };
+
+  // =========================
+  // ELIMINAR UNA
+  // =========================
+  const eliminar =
+    async (id) => {
+
+      try {
+
+        await api.delete(
+          `/notificaciones/${id}`
+        );
+
+        setNotificaciones(prev =>
+          prev.filter(
+            n => n.id !== id
+          )
+        );
+
+      } catch (error) {
+
+        console.error(error);
+      }
+    };
+
+  // =========================
+  // ELIMINAR TODAS
+  // =========================
+  const eliminarTodas =
+    async () => {
+
+      try {
+
+        const usuarioId =
+          localStorage.getItem(
+            "usuarioId"
+          );
+
+        await api.delete(
+          `/notificaciones/usuario/${usuarioId}`
+        );
+
+        setNotificaciones([]);
+
+      } catch (error) {
+
+        console.error(error);
+      }
+    };
+
+  // =========================
+  // FECHA
+  // =========================
+  const formatearFecha =
+    (fecha) => {
+
+      if (!fecha) return "";
+
+      return new Date(fecha)
+        .toLocaleString("es-BO");
+    };
+
+  // =========================
+  // COLOR SEGUN TIPO
+  // =========================
+  const colorTipo =
+    (tipo) => {
+
+      switch (tipo) {
+
+        case "RESERVA":
+          return "bg-blue-100 text-blue-700";
+
+        case "ESTADO":
+          return "bg-green-100 text-green-700";
+
+        case "CANCELACION":
+          return "bg-red-100 text-red-700";
+
+        default:
+          return "bg-gray-100 text-gray-700";
+      }
+    };
+
+  // =========================
+  // FILTRADO
+  // =========================
+  const notificacionesFiltradas =
+    filtro === "TODAS"
+      ? notificaciones
+      : notificaciones.filter(
+          n => n.tipo === filtro
+        );
+
+  const noLeidas =
+    notificaciones.filter(
+      n => !n.leida
+    ).length;
+
+  // =========================
+  // INICIAL
+  // =========================
+  useEffect(() => {
+
+    cargarNotificaciones();
+
+  }, []);
+
+  // =========================
+  // REFRESH
+  // =========================
+  useEffect(() => {
+
+    const intervalo =
+      setInterval(() => {
+
+        cargarNotificaciones();
+
+      }, 10000);
+
+    return () =>
+      clearInterval(intervalo);
+
+  }, []);
 
   return (
 
     <div className="relative">
 
-      {/* BOTÓN */}
+      {/* CAMPANA */}
       <button
         onClick={() =>
           setAbierto(!abierto)
@@ -21,127 +249,362 @@ function NotificationBell({
         className="
           relative
           bg-white
-          p-3
+          p-2
           rounded-full
-          shadow
           hover:bg-slate-100
         "
       >
 
-        🔔
+        <Bell
+          size={24}
+          className="text-slate-700"
+        />
 
-        {/* CONTADOR */}
-        {notifications.length > 0 && (
+        {
 
-          <span
-            className="
-              absolute
-              -top-2
-              -right-2
-              bg-red-500
-              text-white
-              text-xs
-              px-2
-              py-1
-              rounded-full
-            "
-          >
+          noLeidas > 0 && (
 
-            {notifications.length}
+            <span
+              className="
+                absolute
+                -top-2
+                -right-2
+                bg-red-500
+                text-white
+                text-xs
+                rounded-full
+                w-5
+                h-5
+                flex
+                items-center
+                justify-center
+              "
+            >
 
-          </span>
-        )}
+              {noLeidas}
+
+            </span>
+
+          )
+        }
 
       </button>
 
-      {/* PANEL */}
-      {abierto && (
+      {
 
-        <div
-          className="
-            absolute
-            right-0
-            mt-3
-            w-80
-            bg-white
-            rounded-2xl
-            shadow-2xl
-            z-50
-            overflow-hidden
-          "
-        >
+        abierto && (
 
           <div
             className="
-              bg-slate-900
-              text-white
-              p-4
-              font-bold
+              absolute
+              right-0
+              top-12
+              bg-white
+              shadow-2xl
+              rounded-2xl
+              w-[420px]
+              z-50
+              overflow-hidden
             "
           >
 
-            Notificaciones
+            {/* HEADER */}
+            <div
+              className="
+                bg-slate-900
+                text-white
+                p-4
+              "
+            >
 
-          </div>
+              <div
+                className="
+                  flex
+                  justify-between
+                  items-center
+                "
+              >
 
-          <div
-            className="
-              max-h-96
-              overflow-y-auto
-            "
-          >
+                <h3 className="font-bold">
 
-            {notifications.length === 0 ? (
+                  Notificaciones
 
-              <div className="p-4 text-gray-500">
+                </h3>
 
-                No hay notificaciones
+                <span>
+
+                  {noLeidas} pendientes
+
+                </span>
 
               </div>
 
-            ) : (
+            </div>
 
-              notifications.map((n, index) => (
+            {/* FILTROS */}
+            <div
+              className="
+                p-3
+                border-b
+                flex
+                gap-2
+                flex-wrap
+              "
+            >
 
-                <div
-                  key={index}
-                  className="
-                    p-4
-                    border-b
-                    hover:bg-slate-50
-                  "
-                >
+              <Filter size={18} />
 
-                  <p className="font-medium">
+              {
 
-                    {n.mensaje}
+                [
+                  "TODAS",
+                  "RESERVA",
+                  "ESTADO",
+                  "CANCELACION"
+                ].map(op => (
 
-                  </p>
-
-                  <p
-                    className="
+                  <button
+                    key={op}
+                    onClick={() =>
+                      setFiltro(op)
+                    }
+                    className={`
+                      px-3
+                      py-1
+                      rounded-full
                       text-sm
+
+                      ${
+                        filtro === op
+                          ? "bg-slate-800 text-white"
+                          : "bg-slate-100"
+                      }
+                    `}
+                  >
+
+                    {op}
+
+                  </button>
+
+                ))
+              }
+
+            </div>
+
+            {/* ACCIONES */}
+            <div
+              className="
+                flex
+                justify-between
+                p-3
+                border-b
+              "
+            >
+
+              <button
+                onClick={
+                  marcarTodasLeidas
+                }
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  text-blue-600
+                  text-sm
+                "
+              >
+
+                <CheckCheck size={16} />
+
+                Marcar todas
+
+              </button>
+
+              <button
+                onClick={
+                  eliminarTodas
+                }
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  text-red-600
+                  text-sm
+                "
+              >
+
+                <Trash2 size={16} />
+
+                Eliminar todas
+
+              </button>
+
+            </div>
+
+            {/* LISTA */}
+            <div
+              className="
+                max-h-[500px]
+                overflow-y-auto
+              "
+            >
+
+              {
+
+                notificacionesFiltradas.length === 0 ? (
+
+                  <div
+                    className="
+                      p-8
+                      text-center
                       text-gray-500
-                      mt-1
                     "
                   >
 
-                    {n.fecha}
+                    No existen notificaciones
 
-                  </p>
+                  </div>
 
-                </div>
+                ) : (
 
-              ))
-            )}
+                  notificacionesFiltradas.map(
+                    (n) => (
+
+                      <div
+                        key={n.id}
+                        className={`
+                          p-4
+                          border-b
+
+                          ${
+                            !n.leida
+                              ? "bg-blue-50"
+                              : ""
+                          }
+                        `}
+                      >
+
+                        <div
+                          className="
+                            flex
+                            justify-between
+                            items-start
+                          "
+                        >
+
+                          <div>
+
+                            <h4
+                              className="
+                                font-semibold
+                              "
+                            >
+
+                              {n.titulo}
+
+                            </h4>
+
+                            <span
+                              className={`
+                                px-2
+                                py-1
+                                text-xs
+                                rounded-full
+
+                                ${colorTipo(
+                                  n.tipo
+                                )}
+                              `}
+                            >
+
+                              {n.tipo}
+
+                            </span>
+
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              eliminar(n.id)
+                            }
+                            className="
+                              text-red-500
+                            "
+                          >
+
+                            <Trash2
+                              size={16}
+                            />
+
+                          </button>
+
+                        </div>
+
+                        <p
+                          className="
+                            mt-2
+                            text-sm
+                          "
+                        >
+
+                          {n.mensaje}
+
+                        </p>
+
+                        <p
+                          className="
+                            text-xs
+                            text-gray-500
+                            mt-2
+                          "
+                        >
+
+                          {
+                            formatearFecha(
+                              n.fecha
+                            )
+                          }
+
+                        </p>
+
+                        {
+
+                          !n.leida && (
+
+                            <button
+                              onClick={() =>
+                                marcarLeida(
+                                  n.id
+                                )
+                              }
+                              className="
+                                mt-2
+                                text-blue-600
+                                text-sm
+                              "
+                            >
+
+                              Marcar como leída
+
+                            </button>
+
+                          )
+                        }
+
+                      </div>
+
+                    )
+                  )
+                )
+              }
+
+            </div>
 
           </div>
 
-        </div>
-      )}
+        )
+      }
 
     </div>
   );
 }
-
-export default NotificationBell;

@@ -35,16 +35,35 @@ public class RecomendacionIAService {
                 reservaRepository
                         .horariosMenosUsados();
 
-        String mejorArea = "Sin datos";
+        String mejorArea =
+                "Sin datos";
 
-        String mejorHorario = "Sin datos";
+        String mejorHorario =
+                "Sin datos";
 
+        Long ocupacionArea =
+                0L;
+
+        Long ocupacionHorario =
+                0L;
+
+        // =========================
+        // AREA MENOS OCUPADA
+        // =========================
         if (!areas.isEmpty()) {
 
             mejorArea =
                     areas.get(0)[0].toString();
+
+            ocupacionArea =
+                    Long.valueOf(
+                            areas.get(0)[1].toString()
+                    );
         }
 
+        // =========================
+        // HORARIO MENOS UTILIZADO
+        // =========================
         if (!horarios.isEmpty()) {
 
             LocalTime hora =
@@ -52,25 +71,53 @@ public class RecomendacionIAService {
 
             mejorHorario =
                     hora.toString();
+
+            ocupacionHorario =
+                    Long.valueOf(
+                            horarios.get(0)[1].toString()
+                    );
         }
 
+        // =========================
+        // RESPUESTA IA
+        // =========================
+
         data.put(
-                "mejorArea",
+                "areaRecomendada",
                 mejorArea
         );
 
         data.put(
-                "mejorHorario",
+                "horarioRecomendado",
                 mejorHorario
         );
 
         data.put(
+                "ocupacionArea",
+                ocupacionArea
+        );
+
+        data.put(
+                "ocupacionHorario",
+                ocupacionHorario
+        );
+
+        data.put(
+                "nivelDemanda",
+                ocupacionArea <= 5
+                        ? "BAJA"
+                        : ocupacionArea <= 15
+                        ? "MEDIA"
+                        : "ALTA"
+        );
+
+        data.put(
                 "mensaje",
-                "La IA recomienda reservar el área "
+                "Se recomienda reservar "
                         + mejorArea
                         + " alrededor de las "
                         + mejorHorario
-                        + " porque tiene menor congestión."
+                        + " porque presenta menor ocupación histórica."
         );
 
         return data;

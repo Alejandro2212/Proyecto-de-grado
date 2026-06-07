@@ -21,31 +21,89 @@ public class AreaComunService {
         return areaRepository.findAll();
     }
 
-    public AreaComun guardar(AreaComun area) {
+    public List<AreaComun> listarActivas() {
+        return areaRepository.findByActivoTrue();
+    }
+
+    public AreaComun guardar(
+            AreaComun area
+    ) {
+        area.setActivo(true);
+
         return areaRepository.save(area);
     }
 
-    public AreaComun obtenerPorId(Long id) {
-
+    public AreaComun obtenerPorId(
+            Long id
+    ) {
         return areaRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Área no encontrada"));
+                        new RuntimeException(
+                                "Área no encontrada"
+                        )
+                );
     }
 
-    public AreaComun actualizar(Long id, AreaComun area) {
+    public AreaComun actualizar(
+            Long id,
+            AreaComun area
+    ) {
 
-        AreaComun existente = obtenerPorId(id);
+        AreaComun existente =
+                obtenerPorId(id);
 
-        existente.setNombre(area.getNombre());
-        existente.setDescripcion(area.getDescripcion());
-        existente.setCapacidad(area.getCapacidad());
-        existente.setHorarioInicio(area.getHorarioInicio());
-        existente.setHorarioFin(area.getHorarioFin());
+        existente.setNombre(
+                area.getNombre()
+        );
 
-        return areaRepository.save(existente);
+        existente.setDescripcion(
+                area.getDescripcion()
+        );
+
+        existente.setCapacidad(
+                area.getCapacidad()
+        );
+
+        existente.setHorarioInicio(
+                area.getHorarioInicio()
+        );
+
+        existente.setHorarioFin(
+                area.getHorarioFin()
+        );
+
+        return areaRepository.save(
+                existente
+        );
     }
 
-    public void eliminar(Long id) {
-        areaRepository.deleteById(id);
+    // =====================
+    // DESACTIVAR
+    // =====================
+    public AreaComun desactivar(
+            Long id
+    ) {
+
+        AreaComun area =
+                obtenerPorId(id);
+
+        area.setActivo(false);
+
+        return areaRepository.save(area);
+    }
+
+    // =====================
+    // ACTIVAR
+    // =====================
+    public AreaComun activar(
+            Long id
+    ) {
+
+        AreaComun area =
+                obtenerPorId(id);
+
+        area.setActivo(true);
+
+        return areaRepository.save(area);
     }
 }

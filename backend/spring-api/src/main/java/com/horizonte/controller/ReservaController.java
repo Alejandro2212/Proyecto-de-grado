@@ -107,6 +107,34 @@ public class ReservaController {
         }
     }
 
+        // =========================
+        // CANCELAR RESERVA
+        // =========================
+        @PutMapping("/{id}/cancelar")
+        public ResponseEntity<?> cancelarReserva(
+
+                @PathVariable Long id,
+
+                @RequestParam Long usuarioId
+        ) {
+
+        try {
+
+                return ResponseEntity.ok(
+                        reservaService.cancelarReserva(
+                                id,
+                                usuarioId
+                        )
+                );
+
+        } catch (Exception e) {
+
+                return ResponseEntity
+                        .badRequest()
+                        .body(e.getMessage());
+        }
+}
+
     // =========================
     // LISTAR
     // =========================
@@ -310,6 +338,6 @@ public class ReservaController {
 
         return ResponseEntity.ok(
                 recomendacionIAService.generar()
-        );
+        );   
     }
 }

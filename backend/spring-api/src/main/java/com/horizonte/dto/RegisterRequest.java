@@ -7,6 +7,7 @@ public class RegisterRequest {
     private String email;
     private String password;
     private String telefono;
+    private String ci;
 
     public RegisterRequest() {
     }
@@ -31,6 +32,10 @@ public class RegisterRequest {
         return telefono;
     }
 
+    public String getCi() {
+        return ci;
+    }
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
@@ -49,5 +54,9 @@ public class RegisterRequest {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
+    }
+
+    public void setCi(String ci) {
+        this.ci = ci;
     }
 }

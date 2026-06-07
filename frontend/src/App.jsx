@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { Toaster } from "react-hot-toast";
 
 import {
@@ -10,7 +11,7 @@ import {
 
 import api from "./services/api";
 
-import Sidebar from "./components/Sidebar";
+import Layout from "./components/Layout";
 
 import Dashboard from "./pages/Dashboard";
 import Reservas from "./pages/Reservas";
@@ -20,37 +21,70 @@ import Disponibilidad from "./pages/Disponibilidad";
 import Auditoria from "./pages/Auditoria";
 import GestionReservas from "./pages/GestionReservas";
 import IADashboard from "./pages/IADashboard";
+import MisReservas from "./pages/MisReservas";
+import Areas from "./pages/Areas";
+import Reportes from "./pages/Reportes";
+import Perfil from "./pages/Perfil";
+import CambiarPassword from "./pages/CambiarPassword";
+
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 import "./index.css";
 
 // =========================
-// PROTECTED ROUTE
+// PROTECTED
 // =========================
 function ProtectedRoute({ children }) {
 
-  const token = localStorage.getItem("token");
+  const token =
+    localStorage.getItem("token");
 
   if (!token) {
-    return <Navigate to="/" replace />;
+
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
   }
 
   return children;
 }
 
 // =========================
-// ROLE PROTECTED ROUTE
+// ROLE
 // =========================
-function RoleProtectedRoute({ children, roleRequired }) {
+function RoleProtectedRoute({
+  children,
+  roleRequired
+}) {
 
-  const token = localStorage.getItem("token");
-  const rol = localStorage.getItem("rol");
+  const token =
+    localStorage.getItem("token");
+
+  const rol =
+    localStorage.getItem("rol");
 
   if (!token) {
-    return <Navigate to="/" replace />;
+
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
   }
 
   if (rol !== roleRequired) {
-    return <Navigate to="/dashboard" replace />;
+
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    );
   }
 
   return children;
@@ -58,13 +92,14 @@ function RoleProtectedRoute({ children, roleRequired }) {
 
 function App() {
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [mensaje, setMensaje] = useState("");
+  const [email,
+    setEmail] = useState("");
 
-  const [logueado, setLogueado] = useState(
-    !!localStorage.getItem("token")
-  );
+  const [password,
+    setPassword] = useState("");
+
+  const [mensaje,
+    setMensaje] = useState("");
 
   // =========================
   // LOGIN
@@ -73,19 +108,38 @@ function App() {
 
     try {
 
-      const response = await api.post("/auth/login", {
-        email,
-        password
-      });
+      const response =
+        await api.post(
+          "/auth/login",
+          {
+            email,
+            password
+          }
+        );
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("usuarioId", response.data.usuarioId);
-      localStorage.setItem("rol", response.data.rol);
+      localStorage.setItem(
+        "token",
+        response.data.token
+      );
 
-      setLogueado(true);
+      localStorage.setItem(
+        "usuarioId",
+        response.data.usuarioId
+      );
+
+      localStorage.setItem(
+        "rol",
+        response.data.rol
+      );
+
+      window.location.href =
+        "/dashboard";
 
     } catch (error) {
-      setMensaje("Credenciales incorrectas");
+
+      setMensaje(
+        "Credenciales incorrectas"
+      );
     }
   };
 
@@ -95,164 +149,175 @@ function App() {
   const logout = () => {
 
     localStorage.clear();
-    setLogueado(false);
+
+    window.location.href =
+      "/login";
   };
 
-  // =========================
-  // LOGIN VIEW
-  // =========================
-  if (!logueado) {
-
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
-
-        <div className="bg-white p-10 rounded-2xl shadow-lg w-96">
-
-          <h1 className="text-3xl font-bold mb-8 text-center">
-            Login Condominio
-          </h1>
-
-          <input
-            type="email"
-            placeholder="Correo"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border p-3 rounded-lg mb-4"
-          />
-
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border p-3 rounded-lg mb-4"
-          />
-
-          <button
-            onClick={login}
-            className="w-full bg-slate-900 text-white p-3 rounded-lg"
-          >
-            Iniciar Sesión
-          </button>
-
-          <p className="text-red-500 mt-4 text-center">
-            {mensaje}
-          </p>
-
-        </div>
-
-      </div>
-    );
-  }
-
-  // =========================
-  // APP PRINCIPAL
-  // =========================
   return (
 
     <BrowserRouter>
 
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000
-          }}
+      <Toaster position="top-right" />
+
+      <Routes>
+
+        {/* LOGIN */}
+        <Route
+          path="/login"
+          element={
+            <Login
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+              mensaje={mensaje}
+              login={login}
+            />
+          }
         />
 
-      <div className="flex">
+        {/* REGISTRO */}
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
-        {/* SIDEBAR */}
-        <Sidebar logout={logout} />
+        {/* RUTAS PROTEGIDAS */}
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
 
-        {/* CONTENIDO */}
-        <div className="flex-1 bg-slate-100 min-h-screen p-6">
+              <Layout logout={logout}>
 
-          <Routes>
-            {/* AUDITORÍA */}
-            <Route
-              path="/auditoria"
-              element={
-                <RoleProtectedRoute roleRequired="ADMIN">
-                  <Auditoria />
-                </RoleProtectedRoute>
-              }
+                <Routes>
+
+                  <Route
+                    path="/dashboard"
+                    element={<Dashboard />}
+                  />
+
+                  <Route
+                    path="/reservas"
+                    element={<Reservas />}
+                  />
+
+                  <Route
+                    path="/calendario"
+                    element={<Calendario />}
+                  />
+
+                  <Route
+                    path="/disponibilidad"
+                    element={<Disponibilidad />}
+                  />
+
+                  <Route
+                    path="/ia"
+                    element={<IADashboard />}
+                  />
+
+                  <Route
+                    path="/mis-reservas"
+                    element={<MisReservas />}
+                  />
+
+                  {/* ADMIN */}
+
+                  <Route
+                    path="/usuarios"
+                    element={
+                      <RoleProtectedRoute roleRequired="ADMIN">
+                        <Usuarios />
+                      </RoleProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/areas"
+                    element={
+                      <RoleProtectedRoute roleRequired="ADMIN">
+                        <Areas />
+                      </RoleProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/auditoria"
+                    element={
+                      <RoleProtectedRoute roleRequired="ADMIN">
+                        <Auditoria />
+                      </RoleProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/gestion-reservas"
+                    element={
+                      <RoleProtectedRoute roleRequired="ADMIN">
+                        <GestionReservas />
+                      </RoleProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="/reportes"
+                    element={
+                      <RoleProtectedRoute roleRequired="ADMIN">
+                        <Reportes />
+                      </RoleProtectedRoute>
+                    }
+                  />
+
+                  <Route
+                    path="*"
+                    element={
+                      <Navigate
+                        to="/dashboard"
+                        replace
+                      />
+                    }
+                  />
+
+                  <Route
+                    path="/cambiar-password"
+                    element={
+                      <ProtectedRoute>
+                        <CambiarPassword />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                </Routes>
+
+              </Layout>
+
+            </ProtectedRoute>
+          }
+        />
+
+        {/* DEFAULT */}
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/login"
+              replace
             />
+          }
+        />
 
-          <Route
-              path="/ia"
-              element={<IADashboard />}
-          />
+        <Route
+          path="/perfil"
+          element={
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute>
+          }
+        />
 
-          <Route
-            path="/gestion-reservas"
-            element={
-              <RoleProtectedRoute roleRequired="ADMIN">
-                <GestionReservas />
-              </RoleProtectedRoute>
-            }
-          />
-
-            {/* REDIRECCIÓN INICIAL */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-            {/* DASHBOARD */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* RESERVAS */}
-            <Route
-              path="/reservas"
-              element={
-                <ProtectedRoute>
-                  <Reservas />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* CALENDARIO */}
-            <Route
-              path="/calendario"
-              element={
-                <ProtectedRoute>
-                  <Calendario />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* USUARIOS (ADMIN) */}
-            <Route
-              path="/usuarios"
-              element={
-                <RoleProtectedRoute roleRequired="ADMIN">
-                  <Usuarios />
-                </RoleProtectedRoute>
-              }
-            />
-
-              {/* DISPONIBILIDAD */}
-            <Route
-              path="/disponibilidad"
-              element={
-                <ProtectedRoute>
-                  <Disponibilidad />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* FALLBACK */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-
-          </Routes>
-
-        </div>
-
-      </div>
+      </Routes>
 
     </BrowserRouter>
   );

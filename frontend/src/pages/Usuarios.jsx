@@ -1,21 +1,33 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 function Usuarios() {
 
-  const [usuarios, setUsuarios] = useState([]);
+  const [usuarios, setUsuarios] =
+    useState([]);
 
-  const [busqueda, setBusqueda] = useState("");
+  const [busqueda, setBusqueda] =
+    useState("");
 
-  const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarModal,
+    setMostrarModal] =
+    useState(false);
 
-  const [nuevoUsuario, setNuevoUsuario] = useState({
-    nombre: "",
-    email: "",
-    password: "",
-    rol: "RESIDENTE"
+  const [nuevoUsuario,
+    setNuevoUsuario] = useState({
+      nombre: "",
+      apellido: "",
+      ci: "",
+      telefono: "",
+      email: "",
+      password: "",
+      rol: "RESIDENTE"
   });
+
+  const [loading, setLoading] =
+    useState(false);
 
   // =========================
   // CARGAR USUARIOS
@@ -24,7 +36,10 @@ function Usuarios() {
 
     try {
 
-      const res = await api.get("/usuarios");
+      setLoading(true);
+
+      const res =
+        await api.get("/usuarios");
 
       setUsuarios(res.data);
 
@@ -32,7 +47,13 @@ function Usuarios() {
 
       console.log(error);
 
-      toast.error("Error al cargar usuarios");
+      toast.error(
+        "Error al cargar usuarios"
+      );
+
+    } finally {
+
+      setLoading(false);
     }
   };
 
@@ -49,22 +70,31 @@ function Usuarios() {
 
     try {
 
-      await api.put(`/usuarios/${id}/estado`);
+      await api.put(
+        `/usuarios/${id}/estado`
+      );
 
-      toast.success("Estado actualizado");
+      toast.success(
+        "Estado actualizado"
+      );
 
       cargarUsuarios();
 
     } catch (error) {
 
-      toast.error("Error al actualizar");
+      toast.error(
+        "Error al actualizar"
+      );
     }
   };
 
   // =========================
   // CAMBIAR ROL
   // =========================
-  const cambiarRol = async (id, rol) => {
+  const cambiarRol = async (
+    id,
+    rol
+  ) => {
 
     try {
 
@@ -72,13 +102,17 @@ function Usuarios() {
         `/usuarios/${id}/rol?rol=${rol}`
       );
 
-      toast.success("Rol actualizado");
+      toast.success(
+        "Rol actualizado"
+      );
 
       cargarUsuarios();
 
     } catch (error) {
 
-      toast.error("Error al cambiar rol");
+      toast.error(
+        "Error al cambiar rol"
+      );
     }
   };
 
@@ -89,11 +123,16 @@ function Usuarios() {
 
     if (
       !nuevoUsuario.nombre ||
+      !nuevoUsuario.apellido ||
+      !nuevoUsuario.ci ||
+      !nuevoUsuario.telefono ||
       !nuevoUsuario.email ||
       !nuevoUsuario.password
     ) {
 
-      toast.error("Completa todos los campos");
+      toast.error(
+        "Completa todos los campos"
+      );
 
       return;
     }
@@ -105,12 +144,17 @@ function Usuarios() {
         nuevoUsuario
       );
 
-      toast.success("Usuario creado");
+      toast.success(
+        "Usuario creado"
+      );
 
       setMostrarModal(false);
 
       setNuevoUsuario({
         nombre: "",
+        apellido: "",
+        ci: "",
+        telefono: "",
         email: "",
         password: "",
         rol: "RESIDENTE"
@@ -132,62 +176,119 @@ function Usuarios() {
   // =========================
   const eliminarUsuario = async (id) => {
 
-    const confirmar = window.confirm(
-      "¿Eliminar usuario?"
-    );
+    const confirm =
+      await Swal.fire({
 
-    if (!confirmar) return;
+        title:
+          "¿Eliminar usuario?",
+
+        text:
+          "Esta acción no se puede deshacer.",
+
+        icon: "warning",
+
+        showCancelButton: true,
+
+        confirmButtonText:
+          "Sí, eliminar",
+
+        cancelButtonText:
+          "Cancelar"
+      });
+
+    if (!confirm.isConfirmed) return;
 
     try {
 
-      await api.delete(`/usuarios/${id}`);
+      await api.delete(
+        `/usuarios/${id}`
+      );
 
-      toast.success("Usuario eliminado");
+      toast.success(
+        "Usuario eliminado"
+      );
 
       cargarUsuarios();
 
     } catch (error) {
 
-      toast.error("Error al eliminar");
+      toast.error(
+        "Error al eliminar"
+      );
     }
   };
 
   // =========================
-  // FILTRADO
+  // FILTRAR
   // =========================
-  const usuariosFiltrados = usuarios.filter((u) =>
+    const usuariosFiltrados =
+      usuarios.filter((u) => {
 
-    u.nombre.toLowerCase()
-      .includes(busqueda.toLowerCase())
+        const texto =
+          busqueda.toLowerCase();
 
-    ||
+        return (
+          `${u.nombre} ${u.apellido}`
+            .toLowerCase()
+            .includes(texto)
 
-    u.email.toLowerCase()
-      .includes(busqueda.toLowerCase())
-  );
+          ||
+
+          u.email
+            .toLowerCase()
+            .includes(texto)
+
+          ||
+
+          (u.ci || "")
+            .toLowerCase()
+            .includes(texto)
+        );
+      });
 
   return (
 
     <div className="p-6">
 
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div
+        className="
+          flex
+          justify-between
+          items-center
+          mb-8
+        "
+      >
 
-        <h1 className="text-3xl font-bold">
-          Panel Administrativo
-        </h1>
+        <div>
+
+          <h1 className="text-4xl font-bold">
+            Gestión de Usuarios
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Administración completa del sistema
+          </p>
+
+        </div>
 
         <button
-          onClick={() => setMostrarModal(true)}
+          onClick={() =>
+            setMostrarModal(true)
+          }
           className="
             bg-slate-900
+            hover:bg-slate-700
             text-white
-            px-5
+            px-6
             py-3
-            rounded-lg
+            rounded-xl
+            shadow-lg
           "
         >
+
           + Nuevo Usuario
+
         </button>
 
       </div>
@@ -200,181 +301,262 @@ function Usuarios() {
           placeholder="Buscar usuario..."
           value={busqueda}
           onChange={(e) =>
-            setBusqueda(e.target.value)
+            setBusqueda(
+              e.target.value
+            )
           }
           className="
             w-full
             border
-            p-3
-            rounded-lg
+            p-4
+            rounded-2xl
+            shadow-sm
           "
         />
 
       </div>
 
       {/* TABLA */}
-      <div className="bg-white rounded-2xl shadow overflow-hidden">
+      <div
+        className="
+          bg-white
+          rounded-3xl
+          shadow
+          overflow-hidden
+        "
+      >
 
-        <table className="w-full">
+        {
 
-          <thead className="bg-slate-900 text-white">
+          loading ? (
 
-            <tr>
+            <div className="p-10 text-center">
 
-              <th className="p-4 text-left">
-                Nombre
-              </th>
+              <h2 className="text-2xl font-bold">
+                Cargando usuarios...
+              </h2>
 
-              <th className="p-4 text-left">
-                Correo
-              </th>
+            </div>
 
-              <th className="p-4 text-left">
-                Rol
-              </th>
+          ) : (
 
-              <th className="p-4 text-left">
-                Estado
-              </th>
+            <table className="w-full">
 
-              <th className="p-4 text-left">
-                Acciones
-              </th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {usuariosFiltrados.map((u) => (
-
-              <tr
-                key={u.id}
-                className="border-b hover:bg-slate-50"
+              <thead
+                className="
+                  bg-slate-900
+                  text-white
+                "
               >
 
-                {/* NOMBRE */}
-                <td className="p-4 font-medium">
-                  {u.nombre}
-                </td>
+                <tr>
 
-                {/* EMAIL */}
-                <td className="p-4">
-                  {u.email}
-                </td>
+                  <th className="p-4 text-left">
+                    Nombre Completo
+                  </th>
 
-                {/* ROL */}
-                <td className="p-4">
+                  <th className="p-4 text-left">
+                    CI
+                  </th>
 
-                  <select
-                    value={u.rol?.nombre}
-                    onChange={(e) =>
-                      cambiarRol(
-                        u.id,
-                        e.target.value
-                      )
+                  <th className="p-4 text-left">
+                    Teléfono
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Correo
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Fecha Registro
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Rol
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Estado
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Acciones
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {
+
+                  usuariosFiltrados.map((u) => (
+
+                    <tr
+                      key={u.id}
+                      className="
+                        border-b
+                        hover:bg-slate-50
+                      "
+                    >
+
+                      {/* NOMBRE */}
+                  <td className="p-4 font-semibold">
+                    {u.nombre} {u.apellido}
+                  </td>
+
+                  <td className="p-4">
+                    {u.ci}
+                  </td>
+
+                  <td className="p-4">
+                    {u.telefono}
+                  </td>
+
+                  <td className="p-4">
+                    {u.email}
+                  </td>
+
+                  <td className="p-4">
+                    {
+                      u.fechaRegistro
+                        ? new Date(
+                            u.fechaRegistro
+                          ).toLocaleDateString()
+                        : "-"
                     }
-                    className="
-                      border
-                      p-2
-                      rounded-lg
-                    "
-                  >
+                  </td>
 
-                    <option value="ADMIN">
-                      ADMIN
-                    </option>
+                      {/* ROL */}
+                      <td className="p-4">
 
-                    <option value="RESIDENTE">
-                      RESIDENTE
-                    </option>
+                        <select
+                          value={u.rol?.nombre}
+                          onChange={(e) =>
+                            cambiarRol(
+                              u.id,
+                              e.target.value
+                            )
+                          }
+                          className="
+                            border
+                            p-2
+                            rounded-xl
+                          "
+                        >
 
-                  </select>
+                          <option value="ADMIN">
+                            ADMIN
+                          </option>
 
-                </td>
+                          <option value="RESIDENTE">
+                            RESIDENTE
+                          </option>
 
-                {/* ESTADO */}
-                <td className="p-4">
+                        </select>
 
-                  <span
-                    className={`
-                      px-3
-                      py-1
-                      rounded-full
-                      text-white
-                      text-sm
-                      ${
-                        u.activo
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      }
-                    `}
-                  >
+                      </td>
 
-                    {u.activo
-                      ? "Activo"
-                      : "Inactivo"}
+                      {/* ESTADO */}
+                      <td className="p-4">
 
-                  </span>
+                        <span
+                          className={`
+                            px-3
+                            py-1
+                            rounded-full
+                            text-white
+                            text-sm
+                            font-bold
 
-                </td>
+                            ${
+                              u.activo
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                            }
+                          `}
+                        >
 
-                {/* ACCIONES */}
-                <td className="p-4 flex gap-2">
+                          {
+                            u.activo
+                              ? "Activo"
+                              : "Inactivo"
+                          }
 
-                  <button
-                    onClick={() =>
-                      cambiarEstado(u.id)
-                    }
-                    className={`
-                      px-4
-                      py-2
-                      rounded-lg
-                      text-white
-                      ${
-                        u.activo
-                          ? "bg-orange-500"
-                          : "bg-green-500"
-                      }
-                    `}
-                  >
+                        </span>
 
-                    {u.activo
-                      ? "Desactivar"
-                      : "Activar"}
+                      </td>
 
-                  </button>
+                      {/* ACCIONES */}
+                      <td className="p-4 flex gap-2">
 
-                  <button
-                    onClick={() =>
-                      eliminarUsuario(u.id)
-                    }
-                    className="
-                      bg-red-600
-                      text-white
-                      px-4
-                      py-2
-                      rounded-lg
-                    "
-                  >
-                    Eliminar
-                  </button>
+                        <button
+                          onClick={() =>
+                            cambiarEstado(
+                              u.id
+                            )
+                          }
+                          className={`
+                            px-4
+                            py-2
+                            rounded-xl
+                            text-white
 
-                </td>
+                            ${
+                              u.activo
+                                ? "bg-orange-500"
+                                : "bg-green-500"
+                            }
+                          `}
+                        >
 
-              </tr>
+                          {
+                            u.activo
+                              ? "Desactivar"
+                              : "Activar"
+                          }
 
-            ))}
+                        </button>
 
-          </tbody>
+                        <button
+                          onClick={() =>
+                            eliminarUsuario(
+                              u.id
+                            )
+                          }
+                          className="
+                            bg-red-600
+                            text-white
+                            px-4
+                            py-2
+                            rounded-xl
+                          "
+                        >
 
-        </table>
+                          Eliminar
+
+                        </button>
+
+                      </td>
+
+                    </tr>
+
+                  ))
+                }
+
+              </tbody>
+
+            </table>
+
+          )
+        }
 
       </div>
 
       {/* MODAL */}
       {
+
         mostrarModal && (
 
           <div
@@ -385,6 +567,7 @@ function Usuarios() {
               flex
               items-center
               justify-center
+              z-50
             "
           >
 
@@ -392,13 +575,21 @@ function Usuarios() {
               className="
                 bg-white
                 p-8
-                rounded-2xl
-                w-[400px]
+                rounded-3xl
+                w-[450px]
               "
             >
 
-              <h2 className="text-2xl font-bold mb-6">
+              <h2
+                className="
+                  text-3xl
+                  font-bold
+                  mb-6
+                "
+              >
+
                 Nuevo Usuario
+
               </h2>
 
               <div className="grid gap-4">
@@ -406,51 +597,130 @@ function Usuarios() {
                 <input
                   type="text"
                   placeholder="Nombre"
-                  value={nuevoUsuario.nombre}
+                  value={
+                    nuevoUsuario.nombre
+                  }
                   onChange={(e) =>
                     setNuevoUsuario({
                       ...nuevoUsuario,
-                      nombre: e.target.value
+                      nombre:
+                        e.target.value
                     })
                   }
-                  className="border p-3 rounded-lg"
+                  className="
+                    border
+                    p-3
+                    rounded-xl
+                  "
+                />
+
+                <input
+                  type="text"
+                  placeholder="Apellido"
+                  value={nuevoUsuario.apellido}
+                  onChange={(e) =>
+                    setNuevoUsuario({
+                      ...nuevoUsuario,
+                      apellido: e.target.value
+                    })
+                  }
+                  className="
+                    border
+                    p-3
+                    rounded-xl
+                  "
+                />
+
+                <input
+                  type="text"
+                  placeholder="CI"
+                  value={nuevoUsuario.ci}
+                  onChange={(e) =>
+                    setNuevoUsuario({
+                      ...nuevoUsuario,
+                      ci: e.target.value
+                    })
+                  }
+                  className="
+                    border
+                    p-3
+                    rounded-xl
+                  "
+                />
+
+                <input
+                  type="text"
+                  placeholder="Teléfono"
+                  value={nuevoUsuario.telefono}
+                  onChange={(e) =>
+                    setNuevoUsuario({
+                      ...nuevoUsuario,
+                      telefono: e.target.value
+                    })
+                  }
+                  className="
+                    border
+                    p-3
+                    rounded-xl
+                  "
                 />
 
                 <input
                   type="email"
                   placeholder="Correo"
-                  value={nuevoUsuario.email}
+                  value={
+                    nuevoUsuario.email
+                  }
                   onChange={(e) =>
                     setNuevoUsuario({
                       ...nuevoUsuario,
-                      email: e.target.value
+                      email:
+                        e.target.value
                     })
                   }
-                  className="border p-3 rounded-lg"
+                  className="
+                    border
+                    p-3
+                    rounded-xl
+                  "
                 />
 
                 <input
                   type="password"
                   placeholder="Contraseña"
-                  value={nuevoUsuario.password}
+                  value={
+                    nuevoUsuario.password
+                  }
                   onChange={(e) =>
                     setNuevoUsuario({
                       ...nuevoUsuario,
-                      password: e.target.value
+                      password:
+                        e.target.value
                     })
                   }
-                  className="border p-3 rounded-lg"
+                  className="
+                    border
+                    p-3
+                    rounded-xl
+                  "
                 />
 
                 <select
-                  value={nuevoUsuario.rol}
+                  value={
+                    nuevoUsuario.rol
+                  }
                   onChange={(e) =>
                     setNuevoUsuario({
                       ...nuevoUsuario,
-                      rol: e.target.value
+                      rol:
+                        e.target.value
                     })
                   }
-                  className="border p-3 rounded-lg"
+                  className="
+                    border
+                    p-3
+                    rounded-xl
+                  "
                 >
 
                   <option value="RESIDENTE">
@@ -463,33 +733,47 @@ function Usuarios() {
 
                 </select>
 
-                <div className="flex gap-3 mt-4">
+                <div
+                  className="
+                    flex
+                    gap-3
+                    mt-4
+                  "
+                >
 
                   <button
-                    onClick={crearUsuario}
+                    onClick={
+                      crearUsuario
+                    }
                     className="
                       flex-1
                       bg-slate-900
                       text-white
                       p-3
-                      rounded-lg
+                      rounded-xl
                     "
                   >
+
                     Crear
+
                   </button>
 
                   <button
                     onClick={() =>
-                      setMostrarModal(false)
+                      setMostrarModal(
+                        false
+                      )
                     }
                     className="
                       flex-1
                       bg-gray-300
                       p-3
-                      rounded-lg
+                      rounded-xl
                     "
                   >
+
                     Cancelar
+
                   </button>
 
                 </div>

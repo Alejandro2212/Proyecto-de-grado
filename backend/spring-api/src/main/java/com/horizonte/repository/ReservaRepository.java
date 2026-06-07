@@ -69,10 +69,37 @@ public interface ReservaRepository
     List<Object[]> reservasPorMes();
 
     List<Reserva> findByUsuario_Id(Long usuarioId);
+    List<Reserva> findByAreaComun_Id(Long areaId);
+
+    Long countByUsuario_Id(Long usuarioId);
+
+    Long countByAreaComun_Id(Long areaId);
 
     List<Reserva> findByEstado(EstadoReserva estado);
 
     Long countByEstado(EstadoReserva estado);
+
+    // ====================================
+    // NUEVOS MÉTODOS PARA REPORTES
+    // ====================================
+
+    default Long countPendientes() {
+        return countByEstado(
+                EstadoReserva.PENDIENTE
+        );
+    }
+
+    default Long countAprobadas() {
+        return countByEstado(
+                EstadoReserva.APROBADA
+        );
+    }
+
+    default Long countCanceladas() {
+        return countByEstado(
+                EstadoReserva.CANCELADA
+        );
+    }
 
     @Query(
         "SELECT r.areaComun.nombre, COUNT(r) total " +
@@ -146,4 +173,30 @@ public interface ReservaRepository
         "ORDER BY total ASC"
     )
     List<Object[]> horariosMenosUsados();
+
+// =====================================
+// DASHBOARD EJECUTIVO AVANZADO
+// =====================================
+
+@Query("""
+       SELECT COUNT(r)
+       FROM Reserva r
+       WHERE FUNCTION('MONTH', r.fecha) = FUNCTION('MONTH', CURRENT_DATE)
+       """)
+Long reservasMesActual();
+
+@Query("""
+       SELECT COUNT(r)
+       FROM Reserva r
+       WHERE r.estado = 'CANCELADA'
+       """)
+Long totalCanceladasDashboard();
+
+@Query("""
+       SELECT r.areaComun.nombre, COUNT(r)
+       FROM Reserva r
+       GROUP BY r.areaComun.nombre
+       ORDER BY COUNT(r) ASC
+       """)
+List<Object[]> areaMenosReservada();   
 }

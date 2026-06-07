@@ -1,28 +1,27 @@
 import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
 
-export default function Layout({ children }) {
+export default function Layout({
+  children,
+  logout
+}) {
 
-    return (
+  return (
 
-        <div
-            style={{
-                display: "flex"
-            }}
-        >
+    <div className="flex bg-slate-100">
 
-            <Sidebar />
+      {/* SIDEBAR */}
+      <Sidebar logout={logout} />
 
-            <div
-                style={{
-                    padding: "20px",
-                    width: "100%"
-                }}
-            >
+      {/* CONTENIDO */}
+      <div className="flex-1 p-6">
 
-                {children}
+        <Navbar logout={logout} />
 
-            </div>
+        {children}
 
-        </div>
-    );
+      </div>
+
+    </div>
+  );
 }

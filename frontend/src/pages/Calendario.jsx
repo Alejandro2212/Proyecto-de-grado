@@ -16,13 +16,14 @@ import api from "../services/api";
 
 export default function Calendario() {
 
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] =
+    useState([]);
 
   const [loading, setLoading] =
     useState(true);
 
   // =========================
-  // COLOR ESTADOS
+  // COLORES
   // =========================
   const colores = {
 
@@ -36,7 +37,7 @@ export default function Calendario() {
   };
 
   // =========================
-  // CARGAR
+  // CARGAR RESERVAS
   // =========================
   const cargarReservas = async () => {
 
@@ -53,9 +54,9 @@ export default function Calendario() {
           id: r.id,
 
           title:
-            r.areaComun.nombre +
+            r.areaComun?.nombre +
             " • " +
-            r.usuario.nombre,
+            r.usuario?.nombre,
 
           start:
             `${r.fecha}T${r.horaInicio}`,
@@ -75,10 +76,10 @@ export default function Calendario() {
               r.estado,
 
             usuario:
-              r.usuario.nombre,
+              r.usuario?.nombre,
 
             area:
-              r.areaComun.nombre,
+              r.areaComun?.nombre,
 
             fecha:
               r.fecha,
@@ -109,6 +110,9 @@ export default function Calendario() {
 
   }, []);
 
+  // =========================
+  // EVENT CLICK
+  // =========================
   const handleEventClick = (info) => {
 
     const e = info.event;
@@ -119,45 +123,62 @@ export default function Calendario() {
 
       html: `
 
-        <p><b>Área:</b> ${e.extendedProps.area}</p>
+        <div style="text-align:left">
 
-        <p><b>Usuario:</b> ${e.extendedProps.usuario}</p>
+          <p><b>Área:</b> ${e.extendedProps.area}</p>
 
-        <p><b>Estado:</b> ${e.extendedProps.estado}</p>
+          <p><b>Usuario:</b> ${e.extendedProps.usuario}</p>
 
-        <p><b>Fecha:</b> ${e.extendedProps.fecha}</p>
+          <p><b>Estado:</b> ${e.extendedProps.estado}</p>
 
+          <p><b>Fecha:</b> ${e.extendedProps.fecha}</p>
+
+          <p><b>Inicio:</b> ${e.extendedProps.inicio}</p>
+
+          <p><b>Fin:</b> ${e.extendedProps.fin}</p>
+
+        </div>
       `
     });
   };
 
+  // =========================
+  // LOADING
+  // =========================
   if (loading) {
 
     return (
 
       <div className="p-10">
 
-        <div className="text-2xl font-bold">
-
+        <h1 className="text-2xl font-bold">
           Cargando calendario...
-
-        </div>
+        </h1>
 
       </div>
     );
   }
 
+  // =========================
+  // RETURN
+  // =========================
   return (
 
     <div className="p-6">
 
-      <h1 className="text-4xl font-bold mb-6">
+      <div className="mb-8">
 
-        Calendario Inteligente
+        <h1 className="text-4xl font-bold text-slate-800">
+          Calendario Inteligente
+        </h1>
 
-      </h1>
+        <p className="text-gray-500 mt-2">
+          Visualización avanzada de reservas
+        </p>
 
-      <div className="bg-white p-6 rounded-3xl shadow-xl">
+      </div>
+
+      <div className="bg-white p-6 rounded-3xl shadow-2xl">
 
         <FullCalendar
 
@@ -179,8 +200,13 @@ export default function Calendario() {
           eventClick={handleEventClick}
 
           headerToolbar={{
-            left: "prev,next today",
-            center: "title",
+
+            left:
+              "prev,next today",
+
+            center:
+              "title",
+
             right:
               "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
           }}

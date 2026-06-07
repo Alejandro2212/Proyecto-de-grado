@@ -1,19 +1,11 @@
 package com.horizonte.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.horizonte.entity.AreaComun;
 import com.horizonte.service.AreaComunService;
+
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/areas")
@@ -31,6 +23,11 @@ public class AreaComunController {
     @GetMapping
     public List<AreaComun> listar() {
         return areaService.listar();
+    }
+
+    @GetMapping("/activas")
+    public List<AreaComun> activas() {
+        return areaService.listarActivas();
     }
 
     @PostMapping
@@ -55,10 +52,17 @@ public class AreaComunController {
         return areaService.actualizar(id, area);
     }
 
-    @DeleteMapping("/{id}")
-    public void eliminar(
+    @PutMapping("/{id}/activar")
+    public AreaComun activar(
             @PathVariable Long id
     ) {
-        areaService.eliminar(id);
+        return areaService.activar(id);
+    }
+
+    @PutMapping("/{id}/desactivar")
+    public AreaComun desactivar(
+            @PathVariable Long id
+    ) {
+        return areaService.desactivar(id);
     }
 }

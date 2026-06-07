@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
-
 import api from "../services/api";
-
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 function GestionReservas() {
 
   const [reservas, setReservas] = useState([]);
-
   const [estado, setEstado] = useState("");
-
   const [fecha, setFecha] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // =========================
   // CARGAR
@@ -18,6 +16,8 @@ function GestionReservas() {
   const cargar = async () => {
 
     try {
+
+      setLoading(true);
 
       let url = "/reservas";
 
@@ -34,6 +34,12 @@ function GestionReservas() {
     } catch (error) {
 
       console.log(error);
+
+      toast.error("Error al cargar reservas");
+
+    } finally {
+
+      setLoading(false);
     }
   };
 
@@ -46,55 +52,59 @@ function GestionReservas() {
   // =========================
   // CAMBIAR ESTADO
   // =========================
-    const cambiarEstado = async (
+  const cambiarEstado = async (
     id,
     nuevoEstado
-    ) => {
+  ) => {
+
+    const confirm = await Swal.fire({
+
+      title: "¿Confirmar acción?",
+      text: `Cambiar estado a ${nuevoEstado}`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (!confirm.isConfirmed) return;
 
     try {
 
-        await api.put(
+      await api.put(
         `/reservas/${id}/estado?estado=${nuevoEstado}`
-        );
+      );
 
-        // TOAST PROFESIONAL
-        if (nuevoEstado === "APROBADA") {
+      if (nuevoEstado === "APROBADA") {
 
-        toast.success(
-            "✅ Reserva aprobada"
-        );
+        toast.success("✅ Reserva aprobada");
 
-        } else if (
+      } else if (
         nuevoEstado === "RECHAZADA"
-        ) {
+      ) {
 
-        toast.error(
-            "❌ Reserva rechazada"
-        );
+        toast.error("❌ Reserva rechazada");
 
-        } else {
+      } else {
 
-        toast(
-            "⚠️ Reserva cancelada"
-        );
-        }
+        toast("⚠️ Reserva cancelada");
+      }
 
-        // SONIDO
-        const audio = new Audio(
+      const audio = new Audio(
         `${window.location.origin}/notification.mp3`
-        );
+      );
 
-        audio.play();
+      audio.play();
 
-        cargar();
+      cargar();
 
     } catch (error) {
 
-        console.log(error);
+      console.log(error);
 
-        toast.error("Error");
+      toast.error("Error al actualizar estado");
     }
-    };
+  };
 
   // =========================
   // COLOR ESTADO
@@ -124,14 +134,25 @@ function GestionReservas() {
 
     <div className="p-6">
 
-      <h1 className="text-3xl font-bold mb-6">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6">
 
-        Gestión de Reservas
+        <div>
 
-      </h1>
+          <h1 className="text-4xl font-bold text-slate-800">
+            Gestión Inteligente de Reservas
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Administración avanzada de solicitudes
+          </p>
+
+        </div>
+
+      </div>
 
       {/* FILTROS */}
-      <div className="bg-white p-5 rounded-2xl shadow mb-6 flex gap-4">
+      <div className="bg-white p-5 rounded-2xl shadow mb-6 flex gap-4 flex-wrap">
 
         <select
           value={estado}
@@ -176,6 +197,7 @@ function GestionReservas() {
           onClick={cargar}
           className="
             bg-slate-900
+            hover:bg-slate-700
             text-white
             px-5
             rounded-lg
@@ -189,147 +211,163 @@ function GestionReservas() {
       {/* TABLA */}
       <div className="bg-white rounded-2xl shadow overflow-hidden">
 
-        <table className="w-full">
+        {
 
-          <thead className="bg-slate-900 text-white">
+          loading ? (
 
-            <tr>
+            <div className="p-10 text-center text-xl font-bold">
+              Cargando reservas...
+            </div>
 
-              <th className="p-4 text-left">
-                Usuario
-              </th>
+          ) : (
 
-              <th className="p-4 text-left">
-                Área
-              </th>
+            <table className="w-full">
 
-              <th className="p-4 text-left">
-                Fecha
-              </th>
+              <thead className="bg-slate-900 text-white">
 
-              <th className="p-4 text-left">
-                Horario
-              </th>
+                <tr>
 
-              <th className="p-4 text-left">
-                Estado
-              </th>
+                  <th className="p-4 text-left">
+                    Usuario
+                  </th>
 
-              <th className="p-4 text-left">
-                Acciones
-              </th>
+                  <th className="p-4 text-left">
+                    Área
+                  </th>
 
-            </tr>
+                  <th className="p-4 text-left">
+                    Fecha
+                  </th>
 
-          </thead>
+                  <th className="p-4 text-left">
+                    Horario
+                  </th>
 
-          <tbody>
+                  <th className="p-4 text-left">
+                    Estado
+                  </th>
 
-            {reservas.map((r) => (
+                  <th className="p-4 text-left">
+                    Acciones
+                  </th>
 
-              <tr
-                key={r.id}
-                className="border-b"
-              >
+                </tr>
 
-                <td className="p-4">
-                  {r.usuario.nombre}
-                </td>
+              </thead>
 
-                <td className="p-4">
-                  {r.areaComun.nombre}
-                </td>
+              <tbody>
 
-                <td className="p-4">
-                  {r.fecha}
-                </td>
+                {reservas.map((r) => (
 
-                <td className="p-4">
-                  {r.horaInicio} - {r.horaFin}
-                </td>
-
-                <td className="p-4">
-
-                  <span
-                    className={`
-                      px-3
-                      py-1
-                      rounded-full
-                      text-sm
-                      font-bold
-                      ${colorEstado(r.estado)}
-                    `}
+                  <tr
+                    key={r.id}
+                    className="border-b hover:bg-slate-50"
                   >
-                    {r.estado}
-                  </span>
 
-                </td>
+                    <td className="p-4 font-semibold">
+                      {r.usuario.nombre}
+                    </td>
 
-                <td className="p-4 flex gap-2">
+                    <td className="p-4">
+                      {r.areaComun.nombre}
+                    </td>
 
-                  <button
-                    onClick={() =>
-                      cambiarEstado(
-                        r.id,
-                        "APROBADA"
-                      )
-                    }
-                    className="
-                      bg-green-600
-                      text-white
-                      px-3
-                      py-2
-                      rounded-lg
-                    "
-                  >
-                    Aprobar
-                  </button>
+                    <td className="p-4">
+                      {r.fecha}
+                    </td>
 
-                  <button
-                    onClick={() =>
-                      cambiarEstado(
-                        r.id,
-                        "RECHAZADA"
-                      )
-                    }
-                    className="
-                      bg-red-600
-                      text-white
-                      px-3
-                      py-2
-                      rounded-lg
-                    "
-                  >
-                    Rechazar
-                  </button>
+                    <td className="p-4">
+                      {r.horaInicio} - {r.horaFin}
+                    </td>
 
-                  <button
-                    onClick={() =>
-                      cambiarEstado(
-                        r.id,
-                        "CANCELADA"
-                      )
-                    }
-                    className="
-                      bg-gray-600
-                      text-white
-                      px-3
-                      py-2
-                      rounded-lg
-                    "
-                  >
-                    Cancelar
-                  </button>
+                    <td className="p-4">
 
-                </td>
+                      <span
+                        className={`
+                          px-3
+                          py-1
+                          rounded-full
+                          text-sm
+                          font-bold
+                          ${colorEstado(r.estado)}
+                        `}
+                      >
+                        {r.estado}
+                      </span>
 
-              </tr>
+                    </td>
 
-            ))}
+                    <td className="p-4 flex gap-2 flex-wrap">
 
-          </tbody>
+                      <button
+                        onClick={() =>
+                          cambiarEstado(
+                            r.id,
+                            "APROBADA"
+                          )
+                        }
+                        className="
+                          bg-green-600
+                          hover:bg-green-700
+                          text-white
+                          px-3
+                          py-2
+                          rounded-lg
+                        "
+                      >
+                        Aprobar
+                      </button>
 
-        </table>
+                      <button
+                        onClick={() =>
+                          cambiarEstado(
+                            r.id,
+                            "RECHAZADA"
+                          )
+                        }
+                        className="
+                          bg-red-600
+                          hover:bg-red-700
+                          text-white
+                          px-3
+                          py-2
+                          rounded-lg
+                        "
+                      >
+                        Rechazar
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          cambiarEstado(
+                            r.id,
+                            "CANCELADA"
+                          )
+                        }
+                        className="
+                          bg-gray-600
+                          hover:bg-gray-700
+                          text-white
+                          px-3
+                          py-2
+                          rounded-lg
+                        "
+                      >
+                        Cancelar
+                      </button>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          )
+        }
 
       </div>
 

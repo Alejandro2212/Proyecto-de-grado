@@ -3,11 +3,20 @@ import api from "../services/api";
 
 function Auditoria() {
 
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] =
+    useState([]);
 
+  const [loading, setLoading] =
+    useState(true);
+
+  // =========================
+  // CARGAR LOGS
+  // =========================
   const cargarLogs = async () => {
 
     try {
+
+      setLoading(true);
 
       const res =
         await api.get("/auditoria");
@@ -17,6 +26,10 @@ function Auditoria() {
     } catch (error) {
 
       console.log(error);
+
+    } finally {
+
+      setLoading(false);
     }
   };
 
@@ -26,15 +39,40 @@ function Auditoria() {
 
   }, []);
 
+  // =========================
+  // LOADING
+  // =========================
+  if (loading) {
+
+    return (
+
+      <div className="p-10">
+
+        <h1 className="text-2xl font-bold">
+          Cargando auditoría...
+        </h1>
+
+      </div>
+    );
+  }
+
   return (
 
     <div className="p-6">
 
-      <h1 className="text-3xl font-bold mb-6">
-        Bitácora del Sistema
-      </h1>
+      <div className="mb-8">
 
-      <div className="bg-white rounded-2xl shadow overflow-hidden">
+        <h1 className="text-4xl font-bold text-slate-800">
+          Bitácora Inteligente
+        </h1>
+
+        <p className="text-gray-500 mt-2">
+          Registro de actividades del sistema
+        </p>
+
+      </div>
+
+      <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
 
         <table className="w-full">
 
@@ -42,15 +80,15 @@ function Auditoria() {
 
             <tr>
 
-              <th className="p-4 text-left">
+              <th className="p-5 text-left">
                 Usuario
               </th>
 
-              <th className="p-4 text-left">
+              <th className="p-5 text-left">
                 Acción
               </th>
 
-              <th className="p-4 text-left">
+              <th className="p-5 text-left">
                 Fecha
               </th>
 
@@ -60,31 +98,54 @@ function Auditoria() {
 
           <tbody>
 
-            {logs.map((log) => (
+            {
+              logs.length === 0 ? (
 
-              <tr
-                key={log.id}
-                className="border-b hover:bg-slate-50"
-              >
+                <tr>
 
-                <td className="p-4 font-semibold">
-                  {log.usuario}
-                </td>
+                  <td
+                    colSpan="3"
+                    className="p-6 text-center"
+                  >
 
-                <td className="p-4">
-                  {log.accion}
-                </td>
+                    No existen registros
 
-                <td className="p-4 text-gray-600">
-                  {
-                    new Date(log.fecha)
-                      .toLocaleString()
-                  }
-                </td>
+                  </td>
 
-              </tr>
+                </tr>
 
-            ))}
+              ) : (
+
+                logs.map((log) => (
+
+                  <tr
+                    key={log.id}
+                    className="
+                      border-b
+                      hover:bg-slate-50
+                      transition
+                    "
+                  >
+
+                    <td className="p-5 font-semibold">
+                      {log.usuario}
+                    </td>
+
+                    <td className="p-5">
+                      {log.accion}
+                    </td>
+
+                    <td className="p-5 text-gray-500">
+                      {
+                        new Date(log.fecha)
+                          .toLocaleString()
+                      }
+                    </td>
+
+                  </tr>
+                ))
+              )
+            }
 
           </tbody>
 

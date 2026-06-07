@@ -1,23 +1,26 @@
 package com.horizonte.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+
 import com.horizonte.dto.PrediccionDTO;
 import com.horizonte.dto.ReservaDTO;
 import com.horizonte.entity.AreaComun;
 import com.horizonte.entity.Reserva;
 import com.horizonte.entity.Usuario;
 import com.horizonte.entity.enums.EstadoReserva;
+import com.horizonte.exception.ReservaException;
 import com.horizonte.repository.AreaComunRepository;
 import com.horizonte.repository.ReservaRepository;
 import com.horizonte.repository.UsuarioRepository;
+import com.horizonte.service.NotificacionService;
 
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class ReservaService {
@@ -34,13 +37,16 @@ public class ReservaService {
 
     private final AuditoriaService auditoriaService;
 
+    private final NotificacionService notificacionService;
+
     public ReservaService(
             ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
             AreaComunRepository areaRepository,
             EmailService emailService,
             SimpMessagingTemplate messagingTemplate,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            NotificacionService notificacionService
     ) {
 
         this.reservaRepository = reservaRepository;
@@ -54,6 +60,8 @@ public class ReservaService {
         this.messagingTemplate = messagingTemplate;
 
         this.auditoriaService = auditoriaService;
+
+        this.notificacionService = notificacionService;
     }
 
     // =====================================================
@@ -77,7 +85,7 @@ public class ReservaService {
                         )
                 );
 
-        Reserva reserva = new Reserva();
+        Reserva reserva = new Reserva();       
 
         reserva.setUsuario(usuario);
 
@@ -97,6 +105,15 @@ public class ReservaService {
 
         Reserva nueva =
                 reservaRepository.save(reserva);
+
+        notificacionService.crearNotificacion(
+                usuario.getId(),
+                "Reserva registrada",
+                "Tu solicitud para "
+                        + area.getNombre()
+                        + " fue registrada correctamente.",
+                "RESERVA"
+        );        
 
         // AUDITORIA
         try {
@@ -136,6 +153,16 @@ public class ReservaService {
 
         Reserva actualizada =
                 reservaRepository.save(reserva);
+
+        notificacionService.crearNotificacion(
+                reserva.getUsuario().getId(),
+                "Estado actualizado",
+                "Tu reserva para "
+                        + reserva.getAreaComun().getNombre()
+                        + " fue "
+                        + estado,
+                "ESTADO"
+        );
 
         // =========================
         // EMAIL
@@ -253,25 +280,143 @@ public class ReservaService {
                 );
     }
 
-    // =====================================================
-    // VALIDAR RESERVA
-    // =====================================================
-    public void validarReserva(
-            Reserva reserva
+// =====================================================
+// CANCELAR RESERVA
+// =====================================================
+public Reserva cancelarReserva(
+        Long reservaId,
+        Long usuarioId
+) {
+
+    Reserva reserva = reservaRepository
+            .findById(reservaId)
+            .orElseThrow(() ->
+                    new RuntimeException(
+                            "Reserva no encontrada"
+                    )
+            );
+
+    if (
+            !reserva.getUsuario().getId()
+                    .equals(usuarioId)
     ) {
 
+        throw new RuntimeException(
+                "No tiene permiso para cancelar esta reserva"
+        );
+    }
+
+    if (
+            reserva.getEstado()
+                    == EstadoReserva.CANCELADA
+    ) {
+
+        throw new RuntimeException(
+                "La reserva ya está cancelada"
+        );
+    }
+
+    if (
+            reserva.getEstado()
+                    == EstadoReserva.RECHAZADA
+    ) {
+
+        throw new RuntimeException(
+                "No puede cancelar una reserva rechazada"
+        );
+    }
+
+    reserva.setEstado(
+            EstadoReserva.CANCELADA
+    );
+
+    Reserva actualizada =
+            reservaRepository.save(reserva);
+
+        notificacionService.crearNotificacion(
+                reserva.getUsuario().getId(),
+                "Reserva cancelada",
+                "La reserva para "
+                        + reserva.getAreaComun().getNombre()
+                        + " fue cancelada.",
+                "CANCELACION"
+        );
+
+    try {
+
+        auditoriaService.registrar(
+                "CANCELAR_RESERVA",
+                reserva.getUsuario().getNombre()
+                        + " canceló la reserva "
+                        + reserva.getId()
+        );
+
+    } catch (Exception e) {
+
+        System.out.println(e.getMessage());
+    }
+
+    return actualizada;
+}
+
+// =====================================================
+// VALIDAR RESERVA
+// =====================================================
+        public void validarReserva(
+                Reserva reserva
+        ) {
+
+        // =========================
+        // USUARIO ACTIVO
+        // =========================
+        if (!reserva.getUsuario().isActivo()) {
+
+                throw new RuntimeException(
+                        "El usuario está inactivo"
+                );
+        }
+
+        // =========================
+        // AREA ACTIVA
+        // =========================
+        if (!reserva.getAreaComun().isActivo()) {
+
+                throw new RuntimeException(
+                        "El área seleccionada está inactiva"
+                );
+        }
+
+        // =========================
         // FECHA PASADA
+        // =========================
         if (
                 reserva.getFecha()
                         .isBefore(LocalDate.now())
         ) {
 
-            throw new RuntimeException(
-                    "No puede reservar fechas pasadas"
-            );
+                throw new RuntimeException(
+                        "No puede reservar fechas pasadas"
+                );
         }
 
-        // HORARIO INVALIDO
+        // =========================
+        // HORAS IGUALES
+        // =========================
+        if (
+                reserva.getHoraInicio()
+                        .equals(
+                                reserva.getHoraFin()
+                        )
+        ) {
+
+                throw new RuntimeException(
+                        "La hora inicio y fin no pueden ser iguales"
+                );
+        }
+
+        // =========================
+        // HORA FIN MENOR
+        // =========================
         if (
                 reserva.getHoraFin()
                         .isBefore(
@@ -279,12 +424,77 @@ public class ReservaService {
                         )
         ) {
 
-            throw new RuntimeException(
-                    "Hora fin inválida"
-            );
+                throw new RuntimeException(
+                        "La hora fin no puede ser menor a la hora inicio"
+                );
         }
 
+        // =========================
+        // HORARIO GENERAL
+        // =========================
+        LocalTime apertura =
+                LocalTime.of(6, 0);
+
+        LocalTime cierre =
+                LocalTime.of(23, 0);
+
+        if (
+                reserva.getHoraInicio()
+                        .isBefore(apertura)
+                ||
+                reserva.getHoraFin()
+                        .isAfter(cierre)
+        ) {
+
+                throw new RuntimeException(
+                        "Horario permitido: 06:00 a 23:00"
+                );
+        }
+
+        // =========================
+        // HORA PASADA DEL MISMO DIA
+        // =========================
+        if (
+                reserva.getFecha()
+                        .equals(LocalDate.now())
+        ) {
+
+                if (
+                        reserva.getHoraInicio()
+                                .isBefore(
+                                        LocalTime.now()
+                                )
+                ) {
+
+                throw new RuntimeException(
+                        "No puede reservar horas pasadas"
+                );
+                }
+        }
+
+        // =========================
+        // HORARIO DEL AREA
+        // =========================
+        if (
+                reserva.getHoraInicio().isBefore(
+                        reserva.getAreaComun()
+                                .getHorarioInicio()
+                )
+                ||
+                reserva.getHoraFin().isAfter(
+                        reserva.getAreaComun()
+                                .getHorarioFin()
+                )
+        ) {
+
+                throw new ReservaException(
+                        "Fuera del horario permitido para el área"
+                );
+        }
+
+        // =========================
         // CONFLICTOS
+        // =========================
         List<Reserva> conflictos =
                 reservaRepository.findConflictos(
 
@@ -299,11 +509,11 @@ public class ReservaService {
 
         if (!conflictos.isEmpty()) {
 
-            throw new RuntimeException(
-                    "El horario ya está ocupado"
-            );
+                throw new ReservaException(
+                        "El horario ya está reservado"
+                );
         }
-    }
+        }
 
     // =====================================================
     // DASHBOARD
