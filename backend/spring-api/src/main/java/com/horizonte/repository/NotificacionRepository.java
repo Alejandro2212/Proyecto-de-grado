@@ -13,6 +13,9 @@ public interface NotificacionRepository
             Long usuarioId
     );
 
+    List<Notificacion>
+    findByGeneralTrueOrderByFechaDesc();
+
     Long countByUsuarioIdAndLeidaFalse(
             Long usuarioId
     );

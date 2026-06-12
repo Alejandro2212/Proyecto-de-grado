@@ -3,9 +3,9 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sklearn.ensemble import RandomForestClassifier
 
-# =========================
-# CONEXION MYSQL
-# =========================
+# =====================================
+# CONEXIÓN A MYSQL
+# =====================================
 
 usuario = "root"
 password = "12345"
@@ -17,86 +17,79 @@ conexion = create_engine(
     f"mysql+pymysql://{usuario}:{password}@{host}:{puerto}/{bd}"
 )
 
-# =========================
-# LEER TABLA RESERVAS
-# =========================
+# =====================================
+# OBTENER DATOS REALES
+# =====================================
 
 query = """
 SELECT
-    DAYOFWEEK(fecha) as dia,
-    HOUR(hora_inicio) as hora,
-    area_id as area
-FROM reservas
-WHERE estado = 'APROBADA'
+    DAYOFWEEK(r.fecha) AS dia,
+    HOUR(r.hora_inicio) AS hora,
+    r.area_id AS area,
+    ac.nombre AS nombre_area
+FROM reservas r
+INNER JOIN areas_comunes ac
+    ON r.area_id = ac.id
+WHERE r.estado = 'APROBADA'
 """
 
 df = pd.read_sql(query, conexion)
 
-# =========================
-# VALIDAR DATOS
-# =========================
+# =====================================
+# VALIDAR EXISTENCIA DE DATOS
+# =====================================
 
 if df.empty:
 
     resultado = {
-
         "areaMasUsada": "Sin datos",
-
         "horarioMasUsado": "Sin datos",
-
         "diaMasReservado": "Sin datos",
-
-        "recomendacion":
-            "No existen suficientes reservas aprobadas"
+        "recomendacion": "Todavía no existen reservas aprobadas suficientes para realizar una predicción."
     }
 
-    print(json.dumps(resultado))
+    print(json.dumps(resultado, ensure_ascii=False))
     exit()
 
-# =========================
-# MACHINE LEARNING
-# =========================
+# =====================================
+# ENTRENAMIENTO DEL MODELO
+# =====================================
 
 X = df[["dia", "hora"]]
-
 y = df["area"]
 
-modelo = RandomForestClassifier()
+modelo = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
 
 modelo.fit(X, y)
 
-# =========================
-# PREDICCION
-# =========================
+# =====================================
+# ÁREA REAL MÁS UTILIZADA
+# =====================================
 
-entrada = pd.DataFrame({
-
-    "dia": [5],
-    "hora": [18]
-})
-
-prediccion = modelo.predict(entrada)
-
-area_predicha = int(prediccion[0])
-
-# =========================
-# ESTADISTICAS
-# =========================
-
-hora_top = int(
-    df["hora"].mode()[0]
+area_top = (
+    df.groupby(["area", "nombre_area"])
+      .size()
+      .reset_index(name="cantidad")
+      .sort_values("cantidad", ascending=False)
+      .iloc[0]
 )
 
-dia_top = int(
-    df["dia"].mode()[0]
-)
+area_predicha = int(area_top["area"])
+nombre_area = area_top["nombre_area"]
+cantidad_area = int(area_top["cantidad"])
 
-# =========================
-# CONVERTIR DIA
-# =========================
+# =====================================
+# ESTADÍSTICAS REALES
+# =====================================
+
+hora_top = int(df["hora"].mode()[0])
+
+dia_top = int(df["dia"].mode()[0])
 
 dias = {
-
     1: "Domingo",
     2: "Lunes",
     3: "Martes",
@@ -106,28 +99,29 @@ dias = {
     7: "Sábado"
 }
 
-dia_texto = dias.get(
-    dia_top,
-    "Desconocido"
+dia_texto = dias.get(dia_top, "Desconocido")
+
+# =====================================
+# RECOMENDACIÓN GENERADA
+# =====================================
+
+recomendacion = (
+    f"Segun el historial de reservas, el area mas utilizada es "
+    f"'{nombre_area}', con {cantidad_area} reservas aprobadas. "
+    f"El horario con mayor demanda es aproximadamente las {hora_top:02d}:00 "
+    f"y el dia con mas actividad es {dia_texto}. "
+    f"Se recomienda realizar reservas con anticipacion o considerar horarios alternativos."
 )
 
-# =========================
+# =====================================
 # RESPUESTA FINAL
-# =========================
+# =====================================
 
 resultado = {
-
-    "areaMasUsada":
-        f"Área ID {area_predicha}",
-
-    "horarioMasUsado":
-        f"{hora_top}:00",
-
-    "diaMasReservado":
-        dia_texto,
-
-    "recomendacion":
-        "IA detectó alta demanda basada en datos reales"
+    "areaMasUsada": nombre_area,
+    "horarioMasUsado": f"{hora_top:02d}:00",
+    "diaMasReservado": dia_texto,
+    "recomendacion": recomendacion
 }
 
-print(json.dumps(resultado))
+print(json.dumps(resultado, ensure_ascii=False))

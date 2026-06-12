@@ -8,3 +8,8 @@ export const obtenerPrediccionIA = async () => {
 
     return response.data;
 };
+
+export const obtenerRecomendacionIA = async () => {
+  const response = await api.get("/ia/recomendacion");
+  return response.data;
+};

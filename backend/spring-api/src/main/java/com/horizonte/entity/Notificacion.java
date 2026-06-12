@@ -25,6 +25,8 @@ public class Notificacion {
 
     private LocalDateTime fecha;
 
+    private boolean general = false;
+
 
 @ManyToOne
 @JoinColumn(name = "usuario_id")
@@ -112,5 +114,13 @@ private Usuario usuario;
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public boolean isGeneral() {
+        return general;
+    }
+
+    public void setGeneral(boolean general) {
+        this.general = general;
     }
 }

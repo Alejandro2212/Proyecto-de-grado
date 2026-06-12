@@ -1,19 +1,34 @@
 import { useEffect, useState } from "react";
-import { obtenerPrediccionIA } from "../services/iaService";
+
+import {
+  obtenerPrediccionIA,
+  obtenerRecomendacionIA
+} from "../services/iaService";
 
 export default function IADashboard() {
 
-  const [data, setData] = useState(null);
+  const [prediccion, setPrediccion] =
+    useState(null);
 
-  const [loading, setLoading] = useState(true);
+  const [recomendacion, setRecomendacion] =
+    useState(null);
 
-  const cargarIA = async () => {
+  const [loading, setLoading] =
+    useState(true);
+
+  const cargarDatos = async () => {
 
     try {
 
-      const res = await obtenerPrediccionIA();
+      const pred =
+        await obtenerPrediccionIA();
 
-      setData(res);
+      const reco =
+        await obtenerRecomendacionIA();
+
+      setPrediccion(pred);
+
+      setRecomendacion(reco);
 
     } catch (error) {
 
@@ -27,7 +42,7 @@ export default function IADashboard() {
 
   useEffect(() => {
 
-    cargarIA();
+    cargarDatos();
 
   }, []);
 
@@ -37,8 +52,13 @@ export default function IADashboard() {
 
       <div className="p-10">
 
-        <h2 className="text-3xl font-bold">
-          Cargando IA Predictiva...
+        <h2
+          className="
+            text-3xl
+            font-bold
+          "
+        >
+          Cargando Inteligencia Artificial...
         </h2>
 
       </div>
@@ -49,59 +69,296 @@ export default function IADashboard() {
 
     <div className="p-6">
 
-      <h1 className="text-4xl font-bold mb-8">
+      <h1
+        className="
+          text-4xl
+          font-bold
+          mb-8
+        "
+      >
         Inteligencia Artificial Predictiva
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* =======================
+          IA PREDICTIVA
+      ======================== */}
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+      <div
+        className="
+          grid
+          grid-cols-1
+          md:grid-cols-2
+          gap-6
+          mb-10
+        "
+      >
 
-          <h3 className="text-xl font-bold mb-3">
+        <div
+          className="
+            bg-white
+            p-6
+            rounded-2xl
+            shadow
+          "
+        >
+
+          <h3
+            className="
+              text-xl
+              font-bold
+              mb-3
+            "
+          >
             Área Más Usada
           </h3>
 
-          <p className="text-3xl text-blue-600 font-bold">
-            {data.areaMasUsada}
+          <p
+            className="
+              text-3xl
+              text-blue-600
+              font-bold
+            "
+          >
+            {prediccion.areaMasUsada}
           </p>
 
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div
+          className="
+            bg-white
+            p-6
+            rounded-2xl
+            shadow
+          "
+        >
 
-          <h3 className="text-xl font-bold mb-3">
+          <h3
+            className="
+              text-xl
+              font-bold
+              mb-3
+            "
+          >
             Horario Más Reservado
           </h3>
 
-          <p className="text-3xl text-green-600 font-bold">
-            {data.horarioMasUsado}
+          <p
+            className="
+              text-3xl
+              text-green-600
+              font-bold
+            "
+          >
+            {prediccion.horarioMasUsado}
           </p>
 
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div
+          className="
+            bg-white
+            p-6
+            rounded-2xl
+            shadow
+          "
+        >
 
-          <h3 className="text-xl font-bold mb-3">
+          <h3
+            className="
+              text-xl
+              font-bold
+              mb-3
+            "
+          >
             Día Más Reservado
           </h3>
 
-          <p className="text-3xl text-orange-600 font-bold">
-            {data.diaMasReservado}
+          <p
+            className="
+              text-3xl
+              text-orange-600
+              font-bold
+            "
+          >
+            {prediccion.diaMasReservado}
           </p>
 
         </div>
 
-        <div className="bg-slate-900 text-white p-6 rounded-2xl shadow">
+        <div
+          className="
+            bg-slate-900
+            text-white
+            p-6
+            rounded-2xl
+            shadow
+          "
+        >
 
-          <h3 className="text-xl font-bold mb-3">
-            Recomendación IA
+          <h3
+            className="
+              text-xl
+              font-bold
+              mb-3
+            "
+          >
+            Recomendación General
           </h3>
 
-          <p className="text-lg">
-            {data.recomendacion}
+          <p
+            className="
+              text-lg
+            "
+          >
+            {prediccion.recomendacion}
           </p>
 
         </div>
+
+      </div>
+
+      {/* =======================
+          IA DE RECOMENDACIÓN
+      ======================== */}
+
+      <h2
+        className="
+          text-3xl
+          font-bold
+          mb-6
+        "
+      >
+        Recomendaciones Inteligentes
+      </h2>
+
+      <div
+        className="
+          grid
+          md:grid-cols-2
+          gap-6
+        "
+      >
+
+        <div
+          className="
+            bg-white
+            rounded-2xl
+            shadow-lg
+            p-6
+          "
+        >
+
+          <h3
+            className="
+              text-xl
+              font-bold
+              mb-3
+            "
+          >
+            Área Recomendada
+          </h3>
+
+          <p
+            className="
+              text-3xl
+              font-bold
+              text-blue-600
+            "
+          >
+            {recomendacion.areaRecomendada}
+          </p>
+
+          <p
+            className="
+              mt-3
+              text-gray-600
+            "
+          >
+            Ocupación histórica:
+            {" "}
+            {recomendacion.ocupacionArea}
+          </p>
+
+        </div>
+
+        <div
+          className="
+            bg-white
+            rounded-2xl
+            shadow-lg
+            p-6
+          "
+        >
+
+          <h3
+            className="
+              text-xl
+              font-bold
+              mb-3
+            "
+          >
+            Horario Recomendada
+          </h3>
+
+          <p
+            className="
+              text-3xl
+              font-bold
+              text-green-600
+            "
+          >
+            {recomendacion.horarioRecomendado}
+          </p>
+
+          <p
+            className="
+              mt-3
+              text-gray-600
+            "
+          >
+            Reservas registradas:
+            {" "}
+            {recomendacion.ocupacionHorario}
+          </p>
+
+        </div>
+
+      </div>
+
+      <div
+        className="
+          mt-6
+          bg-slate-900
+          text-white
+          rounded-2xl
+          p-6
+        "
+      >
+
+        <h3
+          className="
+            text-xl
+            font-bold
+            mb-3
+          "
+        >
+          Nivel de Demanda
+        </h3>
+
+        <p
+          className="
+            text-2xl
+            font-bold
+            mb-3
+          "
+        >
+          {recomendacion.nivelDemanda}
+        </p>
+
+        <p>
+          {recomendacion.mensaje}
+        </p>
 
       </div>
 

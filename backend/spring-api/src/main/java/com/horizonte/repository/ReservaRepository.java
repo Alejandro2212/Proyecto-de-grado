@@ -138,6 +138,7 @@ public interface ReservaRepository
     )
     List<Object[]> areasMasUsadas();
 
+
     @Query(
         "SELECT r.horaInicio, COUNT(r) total " +
         "FROM Reserva r " +

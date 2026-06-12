@@ -7,7 +7,8 @@ import {
   FileSearch,
   BrainCircuit,
   Building2,
-  LogOut
+  LogOut,
+  Bell
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -164,6 +165,14 @@ function Sidebar({ logout }) {
               >
                 <FileText size={20} />
                 Reportes
+              </NavLink>
+
+              <NavLink
+                to="/Admin/avisos"
+                className={linkClass}
+              >
+                <Bell size={20} />
+                Notificaciones
               </NavLink>
 
             </>

@@ -39,6 +39,8 @@ public class ReservaService {
 
     private final NotificacionService notificacionService;
 
+    private final RecomendacionIAService recomendacionIAService;
+
     public ReservaService(
             ReservaRepository reservaRepository,
             UsuarioRepository usuarioRepository,
@@ -46,7 +48,8 @@ public class ReservaService {
             EmailService emailService,
             SimpMessagingTemplate messagingTemplate,
             AuditoriaService auditoriaService,
-            NotificacionService notificacionService
+            NotificacionService notificacionService,
+            RecomendacionIAService recomendacionIAService
     ) {
 
         this.reservaRepository = reservaRepository;
@@ -62,6 +65,8 @@ public class ReservaService {
         this.auditoriaService = auditoriaService;
 
         this.notificacionService = notificacionService;
+
+        this.recomendacionIAService = recomendacionIAService;
     }
 
     // =====================================================
@@ -685,28 +690,28 @@ public Reserva cancelarReserva(
         // =========================
         // RECOMENDACION IA
         // =========================
-        Long total =
-                reservaRepository.totalReservas();
+        String areaPopular =
+                dto.getAreaMasUsada();
 
-        if (total > 100) {
+        String horarioPopular =
+                dto.getHorarioMasUsado();
 
-            dto.setRecomendacion(
-                    "Alta demanda detectada. " +
-                    "Se recomienda ampliar horarios."
-            );
+        String diaPopular =
+                dto.getDiaMasReservado();
 
-        } else if (total > 50) {
+        dto.setRecomendacion(
 
-            dto.setRecomendacion(
-                    "Demanda moderada detectada."
-            );
+                "Según el historial de reservas, el área más utilizada es "
+                + areaPopular +
 
-        } else {
+                ", principalmente alrededor de las "
+                + horarioPopular +
 
-            dto.setRecomendacion(
-                    "Demanda baja actualmente."
-            );
-        }
+                ". El día con mayor actividad es "
+                + diaPopular +
+
+                ". Se recomienda realizar reservas fuera de esos horarios para obtener mayor disponibilidad."
+        );
 
         return dto;
     }

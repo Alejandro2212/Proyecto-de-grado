@@ -26,6 +26,7 @@ import Areas from "./pages/Areas";
 import Reportes from "./pages/Reportes";
 import Perfil from "./pages/Perfil";
 import CambiarPassword from "./pages/CambiarPassword";
+import AdminAvisos from "./pages/AdminAvisos";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -315,6 +316,11 @@ function App() {
               <Perfil />
             </ProtectedRoute>
           }
+        />
+
+        <Route
+          path="/admin/avisos"
+          element={<AdminAvisos />}
         />
 
       </Routes>

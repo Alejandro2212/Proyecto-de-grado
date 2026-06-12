@@ -2,6 +2,7 @@ package com.horizonte.controller;
 
 import com.horizonte.entity.Notificacion;
 import com.horizonte.service.NotificacionService;
+import com.horizonte.dto.NotificacionGeneralDTO;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,4 +83,23 @@ public class NotificacionController {
         ) {
         service.eliminarTodas(usuarioId);
         }
+
+        // ====================================
+        // ENVIAR NOTIFICACIÓN GENERAL
+        // ====================================
+        @PostMapping("/general")
+        public void crearGeneral(
+                @RequestBody
+                NotificacionGeneralDTO dto
+        ) {
+
+        service.crearNotificacionGeneral(
+
+                dto.getTitulo(),
+
+                dto.getMensaje(),
+
+                dto.getTipo()
+        );
+        }        
 }

@@ -21,6 +21,9 @@ export default function NotificationBell() {
     setFiltro] =
     useState("TODAS");
 
+  const [orden, setOrden] =
+    useState("NUEVAS");
+
   // =========================
   // CARGAR NOTIFICACIONES
   // =========================
@@ -193,6 +196,18 @@ export default function NotificationBell() {
 
         default:
           return "bg-gray-100 text-gray-700";
+
+        case "AVISO":
+          return "bg-purple-100 text-purple-700";
+
+        case "MANTENIMIENTO":
+          return "bg-yellow-100 text-yellow-700";
+
+        case "REUNION":
+          return "bg-indigo-100 text-indigo-700";
+
+        case "EMERGENCIA":
+          return "bg-red-100 text-red-700";
       }
     };
 
@@ -205,6 +220,54 @@ export default function NotificationBell() {
       : notificaciones.filter(
           n => n.tipo === filtro
         );
+  
+  const notificacionesOrdenadas =
+    [...notificacionesFiltradas];
+
+  switch (orden) {
+
+    case "ANTIGUAS":
+
+      notificacionesOrdenadas.sort(
+        (a, b) =>
+          new Date(a.fecha)
+          -
+          new Date(b.fecha)
+      );
+
+      break;
+
+    case "NO_LEIDAS":
+
+      notificacionesOrdenadas.sort(
+        (a, b) =>
+          Number(a.leida)
+          -
+          Number(b.leida)
+      );
+
+      break;
+
+    case "LEIDAS":
+
+      notificacionesOrdenadas.sort(
+        (a, b) =>
+          Number(b.leida)
+          -
+          Number(a.leida)
+      );
+
+      break;
+
+    default:
+
+      notificacionesOrdenadas.sort(
+        (a, b) =>
+          new Date(b.fecha)
+          -
+          new Date(a.fecha)
+      );
+  }
 
   const noLeidas =
     notificaciones.filter(
@@ -351,6 +414,47 @@ export default function NotificationBell() {
                 flex-wrap
               "
             >
+          {/* ORDENAMIENTO */}
+          <div
+            className="
+              p-3
+              border-b
+            "
+          >
+
+            <select
+              value={orden}
+              onChange={(e) =>
+                setOrden(e.target.value)
+              }
+              className="
+                w-full
+                border
+                rounded-lg
+                p-2
+                text-sm
+              "
+            >
+
+              <option value="NUEVAS">
+                Más recientes
+              </option>
+
+              <option value="ANTIGUAS">
+                Más antiguas
+              </option>
+
+              <option value="NO_LEIDAS">
+                No leídas primero
+              </option>
+
+              <option value="LEIDAS">
+                Leídas primero
+              </option>
+
+            </select>
+
+          </div>
 
               <Filter size={18} />
 
@@ -360,7 +464,11 @@ export default function NotificationBell() {
                   "TODAS",
                   "RESERVA",
                   "ESTADO",
-                  "CANCELACION"
+                  "CANCELACION",
+                  "AVISO",
+                  "MANTENIMIENTO",
+                  "REUNION",
+                  "EMERGENCIA"
                 ].map(op => (
 
                   <button
@@ -467,7 +575,7 @@ export default function NotificationBell() {
 
                 ) : (
 
-                  notificacionesFiltradas.map(
+                  notificacionesOrdenadas.map(
                     (n) => (
 
                       <div

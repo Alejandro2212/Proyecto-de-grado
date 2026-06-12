@@ -1,5 +1,6 @@
 package com.horizonte.service;
 
+import com.horizonte.dto.PrediccionHorarioDTO;
 import com.horizonte.repository.ReservaRepository;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,9 @@ public class RecomendacionIAService {
                 reservaRepository;
     }
 
+    // =====================================
+    // IA ACTUAL
+    // =====================================
     public Map<String, Object> generar() {
 
         Map<String, Object> data =
@@ -47,9 +51,6 @@ public class RecomendacionIAService {
         Long ocupacionHorario =
                 0L;
 
-        // =========================
-        // AREA MENOS OCUPADA
-        // =========================
         if (!areas.isEmpty()) {
 
             mejorArea =
@@ -61,9 +62,6 @@ public class RecomendacionIAService {
                     );
         }
 
-        // =========================
-        // HORARIO MENOS UTILIZADO
-        // =========================
         if (!horarios.isEmpty()) {
 
             LocalTime hora =
@@ -77,10 +75,6 @@ public class RecomendacionIAService {
                             horarios.get(0)[1].toString()
                     );
         }
-
-        // =========================
-        // RESPUESTA IA
-        // =========================
 
         data.put(
                 "areaRecomendada",
@@ -111,15 +105,80 @@ public class RecomendacionIAService {
                         : "ALTA"
         );
 
-        data.put(
-                "mensaje",
-                "Se recomienda reservar "
-                        + mejorArea
-                        + " alrededor de las "
-                        + mejorHorario
-                        + " porque presenta menor ocupación histórica."
-        );
+String recomendacion;
+
+if (ocupacionArea <= 5) {
+
+    recomendacion =
+            "El área " + mejorArea +
+            " tiene baja demanda. " +
+            "Se recomienda reservarla cerca de las " +
+            mejorHorario +
+            " para asegurar disponibilidad inmediata.";
+
+} else if (ocupacionArea <= 15) {
+
+    recomendacion =
+            "El área " + mejorArea +
+            " presenta demanda moderada. " +
+            "Se aconseja realizar reservas con anticipación.";
+
+} else {
+
+    recomendacion =
+            "Existe alta demanda en " +
+            mejorArea +
+            ". Se recomienda evitar horarios pico y considerar otras áreas disponibles.";
+}
+
+data.put(
+        "mensaje",
+        recomendacion
+);
 
         return data;
+    }
+
+    // =====================================
+    // RECOMENDACION INTELIGENTE
+    // =====================================
+    public PrediccionHorarioDTO
+    obtenerHorarioRecomendado() {
+
+        PrediccionHorarioDTO dto =
+                new PrediccionHorarioDTO();
+
+        List<Object[]> areas =
+                reservaRepository
+                        .areasMenosOcupadas();
+
+        List<Object[]> horarios =
+                reservaRepository
+                        .horariosMenosUsados();
+
+        if (!areas.isEmpty()) {
+
+            dto.setArea(
+                    areas.get(0)[0].toString()
+            );
+        }
+
+        if (!horarios.isEmpty()) {
+
+            dto.setHorarioRecomendado(
+                    horarios.get(0)[0].toString()
+            );
+        }
+
+        // Simulación IA básica
+        dto.setProbabilidad(
+                92.0
+        );
+
+        dto.setRecomendacion(
+                "Según el historial de reservas, este horario presenta menor ocupación y mayor probabilidad de aprobación."
+        );
+
+        return dto;
     }
 }

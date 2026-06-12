@@ -16,6 +16,7 @@ public class NotificacionService {
     private final NotificacionRepository repository;
 
     private final UsuarioRepository usuarioRepository;
+    
 
     public NotificacionService(
             NotificacionRepository repository,
@@ -150,4 +151,39 @@ public void crearNotificacion(
                 usuarioId
         );
         }
+
+        // =========================
+        // NOTIFICACIONES GENERALES    
+        // =========================
+        public void crearNotificacionGeneral(
+                String titulo,
+                String mensaje,
+                String tipo
+        ) {
+
+        List<Usuario> usuarios =
+                usuarioRepository.findAll();
+
+        for (Usuario usuario : usuarios) {
+
+                Notificacion n =
+                        new Notificacion();
+
+                n.setTitulo(titulo);
+
+                n.setMensaje(mensaje);
+
+                n.setTipo(tipo);
+
+                n.setFecha(LocalDateTime.now());
+
+                n.setLeida(false);
+
+                n.setGeneral(true);
+
+                n.setUsuario(usuario);
+
+                repository.save(n);
+        }
+        }        
 }
