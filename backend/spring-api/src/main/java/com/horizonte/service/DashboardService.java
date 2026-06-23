@@ -1,6 +1,7 @@
 package com.horizonte.service;
 
 import com.horizonte.dto.DashboardDTO;
+import com.horizonte.dto.DashboardStatsDTO;
 import com.horizonte.repository.AreaComunRepository;
 import com.horizonte.repository.ReservaRepository;
 import com.horizonte.repository.UsuarioRepository;
@@ -176,6 +177,40 @@ String mensajeIA =
 dto.setMensajeIA(
         mensajeIA
 );
+
+
+    return dto;
+}
+
+public DashboardStatsDTO obtenerEstadisticas() {
+
+    DashboardStatsDTO dto =
+            new DashboardStatsDTO();
+
+    dto.setTotalReservas(
+            reservaRepository.totalReservas()
+    );
+
+    dto.setPendientes(
+            reservaRepository.countPendientes()
+    );
+
+    dto.setAprobadas(
+            reservaRepository.countAprobadas()
+    );
+
+    dto.setCanceladas(
+            reservaRepository.countCanceladas()
+    );
+
+    dto.setReservasPorMes(
+            reservaRepository.reservasPorMes()
+    );
+
+    dto.setReservasPorArea(
+            reservaRepository.reservasPorArea()
+    );
+
     return dto;
 }
 }

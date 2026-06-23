@@ -1,5 +1,10 @@
 import { Buffer } from "buffer";
 import process from "process";
+import { registerSW } from "virtual:pwa-register";
+
+registerSW({
+  immediate: true,
+});
 
 // Polyfill for Buffer and process in the browser
 window.Buffer = Buffer;

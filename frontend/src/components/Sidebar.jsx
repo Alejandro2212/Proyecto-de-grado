@@ -11,6 +11,8 @@ import {
   Bell
 } from "lucide-react";
 
+import logoHorizonte from "../assets/logo-horizonte.png";
+
 import { NavLink } from "react-router-dom";
 import { ClipboardCheck } from "lucide-react";
 import { FileText } from "lucide-react";
@@ -53,17 +55,23 @@ function Sidebar({ logout }) {
       <div>
 
         {/* LOGO */}
-        <div className="p-6 border-b border-slate-800">
+      <div className="p-6 border-b border-slate-800 flex flex-col items-center">
 
-          <h1 className="text-3xl font-bold">
-            Horizonte
-          </h1>
+        <img
+          src={logoHorizonte}
+          alt="Condominio Horizonte"
+          className="w-28 h-auto mb-3"
+        />
 
-          <p className="text-slate-400 text-sm mt-1">
-            Sistema Inteligente
-          </p>
+        <h2 className="text-lg font-bold text-center">
+          Horizonte
+        </h2>
 
-        </div>
+        <p className="text-slate-400 text-xs text-center">
+          Sistema Inteligente
+        </p>
+
+      </div>
 
         {/* MENU */}
         <div className="p-4 flex flex-col gap-2">

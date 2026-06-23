@@ -27,6 +27,8 @@ import Reportes from "./pages/Reportes";
 import Perfil from "./pages/Perfil";
 import CambiarPassword from "./pages/CambiarPassword";
 import AdminAvisos from "./pages/AdminAvisos";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -109,6 +111,20 @@ function App() {
 
     try {
 
+      console.log(
+        "URL API:",
+        api.defaults.baseURL
+      );
+
+      console.log(
+        "EMAIL:",
+        email
+      );
+
+      console.log(
+        "PASSWORD:",
+        password
+      );
       const response =
         await api.post(
           "/auth/login",
@@ -117,6 +133,11 @@ function App() {
             password
           }
         );
+
+      console.log(
+        "LOGIN OK",
+        response.data
+      );
 
       localStorage.setItem(
         "token",
@@ -136,11 +157,24 @@ function App() {
       window.location.href =
         "/dashboard";
 
-    } catch (error) {
+    } 
+    
+    catch (error) {
 
-      setMensaje(
-        "Credenciales incorrectas"
-      );
+      console.error(error);
+
+      if (error.message === "Network Error") {
+
+        setMensaje(
+          "No se pudo conectar con el servidor"
+        );
+
+      } else {
+
+        setMensaje(
+          "Credenciales incorrectas"
+        );
+      }
     }
   };
 
@@ -182,6 +216,16 @@ function App() {
         <Route
           path="/register"
           element={<Register />}
+        />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
         />
 
         {/* RUTAS PROTEGIDAS */}

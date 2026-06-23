@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+
+import api from "../services/api";
+
+import {
+  obtenerUsuarios,
+  obtenerPendientes,
+  aprobarUsuario,
+  rechazarUsuario,
+} from "../services/usuarioService";
+
 
 function Usuarios() {
 
@@ -29,6 +38,11 @@ function Usuarios() {
   const [loading, setLoading] =
     useState(false);
 
+
+  const [pendientes, setPendientes] =
+    useState([]);
+
+
   // =========================
   // CARGAR USUARIOS
   // =========================
@@ -38,10 +52,15 @@ function Usuarios() {
 
       setLoading(true);
 
-      const res =
-        await api.get("/usuarios");
+      const listaUsuarios =
+        await obtenerUsuarios();
 
-      setUsuarios(res.data);
+      const listaPendientes =
+        await obtenerPendientes();
+
+      setUsuarios(listaUsuarios);
+
+      setPendientes(listaPendientes);
 
     } catch (error) {
 
@@ -54,6 +73,7 @@ function Usuarios() {
     } finally {
 
       setLoading(false);
+
     }
   };
 
@@ -217,6 +237,46 @@ function Usuarios() {
       );
     }
   };
+  const aprobar = async (id) => {
+
+    try {
+
+      await aprobarUsuario(id);
+
+      toast.success("Usuario aprobado");
+
+      cargarUsuarios();
+
+    } catch {
+
+      toast.error("Error al aprobar");
+
+    }
+
+  };
+
+const rechazar = async (id) => {
+
+  try {
+
+    await rechazarUsuario(id);
+
+    toast.success("Usuario rechazado");
+
+    cargarUsuarios();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+      error.response?.data ||
+      "Error al rechazar"
+    );
+
+  }
+
+};
 
   // =========================
   // FILTRAR
@@ -292,7 +352,66 @@ function Usuarios() {
         </button>
 
       </div>
+      {
+        pendientes.length > 0 && (
 
+          <div className="mb-8">
+
+            <h2 className="text-2xl font-bold mb-4">
+              Solicitudes pendientes
+            </h2>
+
+            <div className="bg-yellow-50 rounded-2xl p-4">
+
+              {
+                pendientes.map((u) => (
+
+                  <div
+                    key={u.id}
+                    className="flex justify-between items-center border-b py-3"
+                  >
+
+                    <div>
+
+                      <div className="font-bold">
+                        {u.nombre} {u.apellido}
+                      </div>
+
+                      <div className="text-gray-600">
+                        {u.email}
+                      </div>
+
+                    </div>
+
+                    <div className="flex gap-2">
+
+                      <button
+                        onClick={() => aprobar(u.id)}
+                        className="bg-green-600 text-white px-4 py-2 rounded-xl"
+                      >
+                        Aprobar
+                      </button>
+
+                      <button
+                        onClick={() => rechazar(u.id)}
+                        className="bg-red-600 text-white px-4 py-2 rounded-xl"
+                      >
+                        Rechazar
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                ))
+              }
+
+            </div>
+
+          </div>
+
+        )
+      }
       {/* BUSCADOR */}
       <div className="mb-6">
 

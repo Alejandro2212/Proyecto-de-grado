@@ -71,6 +71,7 @@ public class SecurityConfig {
                 // ENDPOINTS PÚBLICOS
                 .requestMatchers(
                         "/api/auth/**",
+                        "/api/password/**",
                         "/ws/**"
                 ).permitAll()
 

@@ -19,7 +19,6 @@ import com.horizonte.exception.ReservaException;
 import com.horizonte.repository.AreaComunRepository;
 import com.horizonte.repository.ReservaRepository;
 import com.horizonte.repository.UsuarioRepository;
-import com.horizonte.service.NotificacionService;
 
 
 @Service
@@ -158,6 +157,26 @@ public class ReservaService {
 
         Reserva actualizada =
                 reservaRepository.save(reserva);
+
+                
+                // REENTRENAMIENTO IA
+               
+                if (estado == EstadoReserva.APROBADA) {
+
+                try {
+
+                        Runtime.getRuntime().exec(
+                        "python C:/Users/LENOVO/Documents/condominio-horizonte/ia-service/reentrenar.py"
+                        );
+
+                } catch (Exception e) {
+
+                        System.out.println(
+                        "Error reentrenando IA: "
+                        + e.getMessage()
+                        );
+                }
+                }                
 
         notificacionService.crearNotificacion(
                 reserva.getUsuario().getId(),

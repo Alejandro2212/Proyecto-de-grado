@@ -20,6 +20,7 @@ public class Usuario {
     // =========================
     // DATOS PERSONALES
     // =========================
+
     @Column(nullable = false)
     private String nombre;
 
@@ -42,44 +43,32 @@ public class Usuario {
     private java.time.LocalDateTime fechaRegistro;
 
     // =========================
-    // ESTADO
+    // ESTADO DEL USUARIO
     // =========================
+
     @Column(nullable = false)
     private Boolean activo = true;
 
     // =========================
-    // RELACIÓN ROL
+    // APROBACIÓN DEL ADMIN
     // =========================
+
+    @Column(nullable = false)
+    private Boolean aprobado = false;
+
+    // =========================
+    // ROL
+    // =========================
+
     @ManyToOne
     @JoinColumn(name = "rol_id")
     private Rol rol;
 
     // =========================
-    // CONSTRUCTORES
+    // CONSTRUCTOR VACÍO
     // =========================
+
     public Usuario() {
-    }
-
-    public Usuario(
-            String nombre,
-            String apellido,
-            String email,
-            String password,
-            String telefono,
-            String ci,
-            Rol rol
-    ) {
-
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.email = email;
-        this.password = password;
-        this.telefono = telefono;
-        this.ci = ci;
-        this.rol = rol;
-        this.activo = true;
-        this.fechaRegistro =
-            java.time.LocalDateTime.now();
     }
 
     // =========================
@@ -90,13 +79,6 @@ public class Usuario {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    // =========================
-    // NOMBRE
-    // =========================
     public String getNombre() {
         return nombre;
     }
@@ -105,9 +87,6 @@ public class Usuario {
         this.nombre = nombre;
     }
 
-    // =========================
-    // APELLIDO
-    // =========================
     public String getApellido() {
         return apellido;
     }
@@ -116,9 +95,6 @@ public class Usuario {
         this.apellido = apellido;
     }
 
-    // =========================
-    // EMAIL
-    // =========================
     public String getEmail() {
         return email;
     }
@@ -127,9 +103,6 @@ public class Usuario {
         this.email = email;
     }
 
-    // =========================
-    // PASSWORD
-    // =========================
     public String getPassword() {
         return password;
     }
@@ -138,44 +111,12 @@ public class Usuario {
         this.password = password;
     }
 
-    // =========================
-    // TELÉFONO
-    // =========================
     public String getTelefono() {
         return telefono;
     }
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
-    }
-
-    // =========================
-    // ACTIVO
-    // =========================
-
-    // Getter tradicional
-    public Boolean getActivo() {
-        return activo;
-    }
-
-    // Getter booleano profesional
-    public boolean isActivo() {
-        return Boolean.TRUE.equals(activo);
-    }
-
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
-    }
-
-    // =========================
-    // ROL
-    // =========================
-    public Rol getRol() {
-        return rol;
-    }
-
-    public void setRol(Rol rol) {
-        this.rol = rol;
     }
 
     public String getCi() {
@@ -190,9 +131,51 @@ public class Usuario {
         return fechaRegistro;
     }
 
-    public void setFechaRegistro(
-            java.time.LocalDateTime fechaRegistro
-    ) {
+    public void setFechaRegistro(java.time.LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
+    }
+
+    // =========================
+    // ACTIVO
+    // =========================
+
+    public Boolean getActivo() {
+        return activo;
+    }
+
+    public boolean isActivo() {
+        return Boolean.TRUE.equals(activo);
+    }
+
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
+
+    // =========================
+    // APROBADO
+    // =========================
+
+    public Boolean getAprobado() {
+        return aprobado;
+    }
+
+    public boolean isAprobado() {
+        return Boolean.TRUE.equals(aprobado);
+    }
+
+    public void setAprobado(Boolean aprobado) {
+        this.aprobado = aprobado;
+    }
+
+    // =========================
+    // ROL
+    // =========================
+
+    public Rol getRol() {
+        return rol;
+    }
+
+    public void setRol(Rol rol) {
+        this.rol = rol;
     }
 }

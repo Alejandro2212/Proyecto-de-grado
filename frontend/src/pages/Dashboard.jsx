@@ -1,6 +1,5 @@
 import {
   Bar,
-  Pie,
   Doughnut
 } from "react-chartjs-2";
 
@@ -37,6 +36,8 @@ import NotificationBell from "../components/NotificationBell";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
+import ChartDataLabels from "chartjs-plugin-datalabels";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -44,7 +45,8 @@ ChartJS.register(
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ChartDataLabels
 );
 
 export default function Dashboard() {
@@ -250,10 +252,10 @@ setMensajeIA(
   // =========================
   useEffect(() => {
 
-    const socket =
-      new SockJS(
-        "http://localhost:8080/ws"
-      );
+  const socket =
+    new SockJS(
+      "http://192.168.100.231:8080/ws"
+    );
 
     const client = new Client({
 
@@ -309,63 +311,6 @@ setMensajeIA(
   }, []);
 
   // =========================
-  // PDF
-  // =========================
-  const descargarPdf = async () => {
-
-    try {
-
-      setLoadingPdf(true);
-
-      const response =
-        await api.get(
-          "/reportes/reservas",
-          {
-            responseType: "blob"
-          }
-        );
-
-      const file = new Blob(
-        [response.data],
-        { type: "application/pdf" }
-      );
-
-      const fileURL =
-        window.URL.createObjectURL(file);
-
-      const link =
-        document.createElement("a");
-
-      link.href = fileURL;
-
-      link.download =
-        "reporte_reservas.pdf";
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      link.remove();
-
-      window.URL.revokeObjectURL(fileURL);
-
-      toast.success(
-        "PDF descargado correctamente"
-      );
-
-    } catch (error) {
-
-      toast.error(
-        "Error al generar PDF"
-      );
-
-    } finally {
-
-      setLoadingPdf(false);
-    }
-  };
-
-  // =========================
   // CHARTS
   // =========================
 const areasData = {
@@ -387,9 +332,54 @@ const areasData = {
   ]
 };
 
+const areasOptions = {
+
+  indexAxis: "y",
+
+  responsive: true,
+
+  plugins: {
+
+    legend: {
+      display: false
+    },
+
+    datalabels: {
+      color: "#fff",
+      anchor: "center",
+      align: "center",
+      font: {
+        weight: "bold"
+      }
+    }
+  },
+
+  scales: {
+
+    x: {
+      beginAtZero: true
+    }
+  }
+};
+
+const nombresMeses = {
+  1: "Enero",
+  2: "Febrero",
+  3: "Marzo",
+  4: "Abril",
+  5: "Mayo",
+  6: "Junio",
+  7: "Julio",
+  8: "Agosto",
+  9: "Septiembre",
+  10: "Octubre",
+  11: "Noviembre",
+  12: "Diciembre"
+};
+
 const mesesData = {
   labels: meses.map(
-    m => `Mes ${m[0]}`
+    m => nombresMeses[m[0]] || "Sin mes"
   ),
 
   datasets: [
@@ -696,7 +686,10 @@ const estadosData = {
             Reservas por Área
           </h2>
 
-          <Pie data={areasData} />
+        <Bar
+          data={areasData}
+          options={areasOptions}
+        />
 
         </div>
 

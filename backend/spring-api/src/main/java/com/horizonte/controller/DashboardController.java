@@ -1,6 +1,7 @@
 package com.horizonte.controller;
 
 import com.horizonte.dto.DashboardDTO;
+import com.horizonte.dto.DashboardStatsDTO;
 import com.horizonte.service.DashboardService;
 
 import org.springframework.web.bind.annotation.*;
@@ -22,5 +23,12 @@ public class DashboardController {
     public DashboardDTO resumen() {
 
         return dashboardService.obtenerResumen();
+    }
+
+    @GetMapping("/stats")
+    public DashboardStatsDTO stats() {
+
+        return dashboardService
+                .obtenerEstadisticas();
     }
 }

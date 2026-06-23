@@ -1,6 +1,8 @@
 package com.horizonte.controller;
 
 import com.horizonte.dto.PrediccionHorarioDTO;
+import com.horizonte.dto.PrediccionRequest;
+import com.horizonte.service.IAFastApiService;
 import com.horizonte.service.RecomendacionIAService;
 
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +15,17 @@ import java.util.Map;
 public class IAController {
 
     private final RecomendacionIAService recomendacionIAService;
+    private final IAFastApiService iaFastApiService;
 
     public IAController(
-            RecomendacionIAService recomendacionIAService
+            RecomendacionIAService recomendacionIAService,
+            IAFastApiService iaFastApiService
     ) {
 
         this.recomendacionIAService =
                 recomendacionIAService;
+
+        this.iaFastApiService = iaFastApiService;
     }
 
     // ====================================
@@ -32,14 +38,38 @@ public class IAController {
         return recomendacionIAService.generar();
     }
 
+        @GetMapping("/recomendacion-horario-global")
+        public PrediccionHorarioDTO obtenerHorarioGlobal() {
+
+        return recomendacionIAService
+                .obtenerHorarioGlobal();
+        }
+
     // ====================================
     // NUEVA IA HORARIOS
     // ====================================
 
     @GetMapping("/recomendacion-horario")
-    public PrediccionHorarioDTO obtenerHorario() {
+    public PrediccionHorarioDTO obtenerHorario(
+
+            @RequestParam Long areaId,
+
+            @RequestParam String fecha
+    ) {
 
         return recomendacionIAService
-                .obtenerHorarioRecomendado();
+                .obtenerHorarioRecomendado(
+                        areaId,
+                        fecha
+                );
+    }
+
+    @PostMapping("/predecir")
+    public String predecir(
+            @RequestBody PrediccionRequest request
+    ) {
+
+        return iaFastApiService
+                .obtenerPrediccion(request);
     }
 }

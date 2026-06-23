@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
+import logoHorizonte from "../assets/logo-horizonte.png";
 
 function Register() {
 
@@ -45,6 +46,20 @@ function Register() {
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
 
       <div className="bg-white p-10 rounded-3xl shadow-xl w-[500px]">
+
+      <div className="flex flex-col items-center mb-6">
+
+        <img
+          src={logoHorizonte}
+          alt="Condominio Horizonte"
+          className="w-32 h-auto mb-4"
+        />
+
+        <h1 className="text-3xl font-bold">
+          Condominio Horizonte
+        </h1>
+
+      </div>
 
         <h1 className="text-3xl font-bold text-center mb-6">
 

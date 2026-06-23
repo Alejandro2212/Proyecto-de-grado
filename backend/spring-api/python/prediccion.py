@@ -96,7 +96,7 @@ dias = {
     4: "Miércoles",
     5: "Jueves",
     6: "Viernes",
-    7: "Sábado"
+    7: "Sabado"
 }
 
 dia_texto = dias.get(dia_top, "Desconocido")
@@ -114,6 +114,12 @@ recomendacion = (
 )
 
 # =====================================
+# TOTAL DE RESERVAS ANALIZADAS
+# =====================================
+
+total_reservas = len(df)
+
+# =====================================
 # RESPUESTA FINAL
 # =====================================
 
@@ -121,7 +127,8 @@ resultado = {
     "areaMasUsada": nombre_area,
     "horarioMasUsado": f"{hora_top:02d}:00",
     "diaMasReservado": dia_texto,
-    "recomendacion": recomendacion
+    "recomendacion": recomendacion,
+    "totalReservas": total_reservas
 }
 
 print(json.dumps(resultado, ensure_ascii=False))

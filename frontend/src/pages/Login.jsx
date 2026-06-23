@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import logo from "../assets/logo-horizonte.png";
+
 
 import {
   Eye,
@@ -73,7 +75,11 @@ function Login({
               "
             >
 
-              <Building2 size={42} />
+            <img
+              src={logo}
+              alt="Condominio Horizonte"
+              className="w-20 h-20 object-contain"
+            />
 
             </div>
 
@@ -207,6 +213,21 @@ function Login({
             </button>
 
             <div className="text-center mt-4">
+
+            <div className="text-center mt-2">
+
+              <Link
+                to="/forgot-password"
+                className="
+                  text-sm
+                  text-blue-600
+                  hover:underline
+                "
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+
+            </div>
               <span className="text-gray-500">
                 ¿No tienes una cuenta?
               </span>

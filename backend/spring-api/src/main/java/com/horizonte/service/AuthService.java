@@ -3,10 +3,8 @@ package com.horizonte.service;
 import com.horizonte.dto.AuthResponse;
 import com.horizonte.dto.LoginRequest;
 import com.horizonte.dto.RegisterRequest;
-
 import com.horizonte.entity.Rol;
 import com.horizonte.entity.Usuario;
-
 import com.horizonte.repository.RolRepository;
 import com.horizonte.repository.UsuarioRepository;
 
@@ -17,11 +15,8 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
-
     private final RolRepository rolRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final JwtService jwtService;
 
     public AuthService(
@@ -30,25 +25,23 @@ public class AuthService {
             PasswordEncoder passwordEncoder,
             JwtService jwtService
     ) {
-
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
 
-    // =========================
-    // REGISTER
-    // =========================
+    // =====================================================
+    // REGISTRO
+    // =====================================================
+
     public AuthResponse register(RegisterRequest request) {
 
-        if (usuarioRepository.existsByEmail(
-                request.getEmail()
-        )) {
+        if (usuarioRepository.existsByEmail(request.getEmail())) {
 
             return new AuthResponse(
                     null,
-                    "El email ya está registrado",
+                    "El correo electrónico ya está registrado.",
                     null,
                     null
             );
@@ -56,65 +49,66 @@ public class AuthService {
 
         Rol rol = rolRepository
                 .findByNombre("RESIDENTE")
-                .orElseGet(() ->
-                        rolRepository.save(
-                                new Rol("RESIDENTE")
-                        )
+                .orElseThrow(() ->
+                        new RuntimeException("Rol RESIDENTE no encontrado")
                 );
 
         Usuario usuario = new Usuario();
 
         usuario.setNombre(request.getNombre());
-
         usuario.setApellido(request.getApellido());
-
         usuario.setEmail(request.getEmail());
-
         usuario.setTelefono(request.getTelefono());
-
         usuario.setCi(request.getCi());
 
-        usuario.setActivo(true);
-
         usuario.setPassword(
-                passwordEncoder.encode(
-                        request.getPassword()
-                )
+                passwordEncoder.encode(request.getPassword())
         );
 
         usuario.setRol(rol);
 
+        // Estado inicial
+        usuario.setActivo(true);
+
+        // NUEVO: requiere aprobación del administrador
+        usuario.setAprobado(false);
+
+        usuario.setFechaRegistro(java.time.LocalDateTime.now());
+
         usuarioRepository.save(usuario);
 
-        String token = jwtService.generateToken(
-                usuario.getEmail()
-        );
-
+        // NO generar token todavía
         return new AuthResponse(
-                token,
-                "Usuario registrado correctamente",
+                null,
+                "Registro exitoso. Su cuenta está pendiente de aprobación por el administrador.",
                 usuario.getId(),
                 usuario.getRol().getNombre()
         );
     }
 
-    // =========================
+    // =====================================================
     // LOGIN
-    // =========================
+    // =====================================================
+
     public AuthResponse login(LoginRequest request) {
 
         Usuario usuario = usuarioRepository
                 .findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Usuario no encontrado"
-                        )
+                        new RuntimeException("Usuario no encontrado.")
                 );
 
-        if (!usuario.getActivo()) {
+        if (!usuario.isActivo()) {
 
             throw new RuntimeException(
-                    "Usuario desactivado"
+                    "La cuenta se encuentra deshabilitada."
+            );
+        }
+
+        if (!usuario.isAprobado()) {
+
+            throw new RuntimeException(
+                    "Su cuenta está pendiente de aprobación por el administrador."
             );
         }
 
@@ -124,7 +118,7 @@ public class AuthService {
         )) {
 
             throw new RuntimeException(
-                    "Contraseña incorrecta"
+                    "Contraseña incorrecta."
             );
         }
 
@@ -134,7 +128,7 @@ public class AuthService {
 
         return new AuthResponse(
                 token,
-                "Login correcto",
+                "Inicio de sesión exitoso.",
                 usuario.getId(),
                 usuario.getRol().getNombre()
         );

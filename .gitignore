@@ -1,24 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
 # Node
 node_modules/
 
 # React
 dist/
 
-# Java
-target/
-*.class
-
-# IntelliJ
-.idea/
-
-# VS Code
-.vscode/
-
 # Logs
 *.log
 
-# Env
-.env
-
-# Mac
-.DS_Store
+# Windows
+Thumbs.db
+Desktop.ini

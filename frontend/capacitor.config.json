@@ -1,0 +1,8 @@
+{
+  "appId": "com.horizonte.reservas",
+  "appName": "Condominio Horizonte",
+  "webDir": "dist",
+  "server": {
+    "cleartext": true
+  }
+}

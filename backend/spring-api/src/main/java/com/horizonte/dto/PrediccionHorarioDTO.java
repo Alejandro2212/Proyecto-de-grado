@@ -1,5 +1,7 @@
 package com.horizonte.dto;
 
+import java.util.List;
+
 public class PrediccionHorarioDTO {
 
     private String area;
@@ -10,8 +12,17 @@ public class PrediccionHorarioDTO {
 
     private String recomendacion;
 
+    // 🔥 NUEVOS CAMPOS PARA HORARIO INTELIGENTE
+    private String mejorHorarioAlternativo;
+
+    private List<String> horariosAlternativos;
+
     public PrediccionHorarioDTO() {
     }
+
+    // =========================
+    // GETTERS Y SETTERS
+    // =========================
 
     public String getArea() {
         return area;
@@ -43,5 +54,25 @@ public class PrediccionHorarioDTO {
 
     public void setRecomendacion(String recomendacion) {
         this.recomendacion = recomendacion;
+    }
+
+    // =========================
+    // NUEVOS GETTERS
+    // =========================
+
+    public String getMejorHorarioAlternativo() {
+        return mejorHorarioAlternativo;
+    }
+
+    public void setMejorHorarioAlternativo(String mejorHorarioAlternativo) {
+        this.mejorHorarioAlternativo = mejorHorarioAlternativo;
+    }
+
+    public List<String> getHorariosAlternativos() {
+        return horariosAlternativos;
+    }
+
+    public void setHorariosAlternativos(List<String> horariosAlternativos) {
+        this.horariosAlternativos = horariosAlternativos;
     }
 }

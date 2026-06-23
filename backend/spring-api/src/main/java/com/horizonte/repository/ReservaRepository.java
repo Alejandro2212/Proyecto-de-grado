@@ -1,15 +1,15 @@
 package com.horizonte.repository;
 
-import com.horizonte.entity.Reserva;
-import com.horizonte.entity.enums.EstadoReserva;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
+import com.horizonte.entity.Reserva;
+import com.horizonte.entity.enums.EstadoReserva;
 
 public interface ReservaRepository
         extends JpaRepository<Reserva, Long> {
@@ -61,11 +61,15 @@ public interface ReservaRepository
     )
     List<Object[]> reservasPorArea();
 
-    @Query(
-        "SELECT FUNCTION('MONTH', r.fecha), COUNT(r) " +
-        "FROM Reserva r " +
-        "GROUP BY FUNCTION('MONTH', r.fecha)"
-    )
+    @Query("""
+    SELECT
+    FUNCTION('MONTH', r.fecha),
+    COUNT(r)
+    FROM Reserva r
+    WHERE r.fecha IS NOT NULL
+    GROUP BY FUNCTION('MONTH', r.fecha)
+    ORDER BY FUNCTION('MONTH', r.fecha)
+    """)
     List<Object[]> reservasPorMes();
 
     List<Reserva> findByUsuario_Id(Long usuarioId);
@@ -175,6 +179,27 @@ public interface ReservaRepository
     )
     List<Object[]> horariosMenosUsados();
 
+    @Query("""
+        SELECT r.horaInicio, COUNT(r)
+        FROM Reserva r
+        WHERE r.fecha >= CURRENT_DATE
+        GROUP BY r.horaInicio
+        ORDER BY COUNT(r) ASC
+        """)
+    List<Object[]> horariosMenosUsadosFuturos();
+
+    @Query("""
+    SELECT r.horaInicio, COUNT(r)
+    FROM Reserva r
+    WHERE r.areaComun.id = :areaId
+    AND r.fecha >= CURRENT_DATE
+    GROUP BY r.horaInicio
+    ORDER BY COUNT(r) ASC
+    """)
+    List<Object[]> horariosMenosUsadosPorArea(
+            @Param("areaId") Long areaId
+    );
+
 // =====================================
 // DASHBOARD EJECUTIVO AVANZADO
 // =====================================
@@ -199,5 +224,8 @@ Long totalCanceladasDashboard();
        GROUP BY r.areaComun.nombre
        ORDER BY COUNT(r) ASC
        """)
-List<Object[]> areaMenosReservada();   
+List<Object[]> areaMenosReservada(); 
+
+
 }
+

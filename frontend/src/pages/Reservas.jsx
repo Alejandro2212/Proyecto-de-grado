@@ -6,6 +6,12 @@ import {
   Clock3,
   Building2
 } from "lucide-react";
+import {
+  obtenerPrediccionRandomForest,
+  obtenerHorarioInteligente
+} from "../services/iaService";
+
+
 
 function Reservas() {
 
@@ -27,6 +33,13 @@ function Reservas() {
 
   const [errores, setErrores] =
     useState([]);
+
+  const [prediccionIA, setPrediccionIA] = 
+    useState(null);
+
+  const [horarioIA, setHorarioIA] =
+    useState(null);
+
 
   // =========================
   // CARGAR ÁREAS
@@ -56,6 +69,33 @@ function Reservas() {
 
   }, []);
 
+
+  useEffect(() => {
+    if (areas.length > 0) {
+      consultarIA();
+    }
+  }, [
+    form.areaId,
+    form.fecha,
+    form.horaInicio,
+    areas
+  ]);
+
+  useEffect(() => {
+
+    if (
+      form.areaId &&
+      form.fecha
+    ) {
+
+      cargarHorarioInteligente();
+
+    }
+
+  }, [
+    form.areaId,
+    form.fecha
+  ]);
   // =========================
   // VALIDACIONES
   // =========================
@@ -134,6 +174,99 @@ function Reservas() {
 
     return listaErrores.length === 0;
   };
+
+  const consultarIA = async () => {
+
+    if (
+      !form.areaId ||
+      !form.fecha ||
+      !form.horaInicio
+    ) {
+      return;
+    }
+
+    try {
+
+      const fecha = new Date(form.fecha);
+
+      const hora = parseInt(
+        form.horaInicio.split(":")[0]
+      );
+
+      const jsDay = fecha.getDay();
+
+      // Convierte:
+      // JS: 0=domingo,1=lunes,...,6=sábado
+      // A: 0=lunes,...,5=sábado,6=domingo
+      const dia_semana = jsDay === 0 ? 6 : jsDay - 1;
+
+      const mes = fecha.getMonth() + 1;
+
+      const areaSeleccionada =
+        areas.find(
+          a => Number(a.id) === Number(form.areaId)
+        );
+
+          if (!form.areaId || !form.fecha || !form.horaInicio) return;
+
+      if (!areaSeleccionada) return;
+
+      const respuesta =
+        await obtenerPrediccionRandomForest({
+
+          area_id: Number(form.areaId),
+
+          hora,
+
+          dia_semana,
+
+          mes,
+
+          capacidad: areaSeleccionada.capacidad
+
+        });
+
+      setPrediccionIA(respuesta);
+
+    } catch (error) {
+
+      console.log(error);
+
+      setPrediccionIA(null);
+
+    }
+
+  };
+
+
+const cargarHorarioInteligente =
+  async () => {
+
+    if (
+      !form.areaId ||
+      !form.fecha
+    ) {
+      return;
+    }
+
+    try {
+
+      const data =
+        await obtenerHorarioInteligente(
+          form.areaId,
+          form.fecha
+        );
+
+      setHorarioIA(data);
+
+    } catch (error) {
+
+      console.log(error);
+
+      setHorarioIA(null);
+
+    }
+};
 
   // =========================
   // VALIDAR DISPONIBILIDAD
@@ -269,6 +402,8 @@ function Reservas() {
     }
   };
 
+  
+
   return (
 
     <div className="p-6">
@@ -284,18 +419,47 @@ function Reservas() {
           Reserva inteligente de áreas comunes
         </p>
 
+        <div
+          className="
+            mt-5
+            bg-gradient-to-r
+            from-violet-600
+            to-indigo-700
+            text-white
+            rounded-2xl
+            p-5
+            shadow-lg
+          "
+        >
+
+          <h3 className="font-bold text-lg">
+            🤖 IA ACTIVA
+          </h3>
+
+          <p className="mt-2 text-sm opacity-90">
+
+            La inteligencia artificial está analizando
+            disponibilidad, demanda histórica y
+            horarios recomendados en tiempo real.
+
+          </p>
+
+        </div>
+
       </div>
 
       {/* FORM */}
-      <div
-        className="
-          bg-white
-          p-8
-          rounded-3xl
-          shadow
-          max-w-2xl
-        "
-      >
+        <div
+          className="
+            grid
+            lg:grid-cols-2
+            gap-8
+            bg-white
+            p-8
+            rounded-3xl
+            shadow-xl
+          "
+        >
 
         <div className="grid gap-5">
 
@@ -547,6 +711,200 @@ function Reservas() {
             )
           }
 
+
+    {
+      prediccionIA && (
+
+        <div
+          className="
+            bg-gradient-to-r
+            from-blue-600
+            to-indigo-700
+            text-white
+            rounded-2xl
+            p-6
+            shadow-xl
+          "
+        >
+          <h3 className="font-bold text-blue-700 mb-2">
+            🤖 Predicción Inteligente
+          </h3>
+
+        <div className="mt-4">
+
+          <p className="text-sm text-blue-100 mb-2">
+            Nivel estimado de demanda
+          </p>
+
+          <span
+            className={`
+              px-4
+              py-2
+              rounded-full
+              font-bold
+              text-white
+
+              ${
+                prediccionIA.prediccion === "BAJA"
+                  ? "bg-green-500"
+                  : prediccionIA.prediccion === "MEDIA"
+                  ? "bg-yellow-500"
+                  : "bg-red-500"
+              }
+            `}
+          >
+            {prediccionIA.prediccion}
+          </span>
+
+        </div>
+
+        <div className="mt-5">
+
+          <div className="w-full bg-white/20 rounded-full h-4">
+
+            <div
+              className={`
+                h-4
+                rounded-full
+
+                ${
+                  prediccionIA.prediccion === "BAJA"
+                    ? "bg-green-400"
+                    : prediccionIA.prediccion === "MEDIA"
+                    ? "bg-yellow-400"
+                    : "bg-red-400"
+                }
+              `}
+              style={{
+                width:
+                  prediccionIA.prediccion === "BAJA"
+                    ? "25%"
+                    : prediccionIA.prediccion === "MEDIA"
+                    ? "60%"
+                    : "100%"
+              }}
+            />
+
+          </div>
+
+        </div>
+
+          <p className="text-sm text-gray-600 mt-2">
+
+            {
+              prediccionIA.prediccion === "BAJA"
+                ? "Existe baja ocupación prevista. Es un excelente momento para reservar."
+                : prediccionIA.prediccion === "MEDIA"
+                ? "Se espera una demanda moderada. Se recomienda reservar con anticipación."
+                : "Existe una alta demanda estimada. Considera realizar la reserva cuanto antes o elegir otro horario."
+            }
+
+          </p>
+
+        </div>
+
+      )
+    }
+
+    {
+      horarioIA && (
+
+        <div className="bg-green-50 border border-green-300 rounded-xl p-4">
+
+          <h3 className="font-bold text-green-700 mb-2">
+
+            💡 Horario sugerido por IA
+
+          </h3>
+
+          <div
+            className="
+              mt-3
+              bg-green-100
+              border
+              border-green-300
+              rounded-xl
+              p-4
+            "
+          >
+
+            <p className="text-sm text-green-700">
+              Mejor horario encontrado
+            </p>
+
+            <h2
+              className="
+                text-3xl
+                font-bold
+                text-green-800
+              "
+            >
+              {horarioIA.mejorHorarioAlternativo}
+            </h2>
+
+            <p className="text-sm mt-2 text-gray-600">
+              Probabilidad de disponibilidad:
+              {" "}
+              {horarioIA.probabilidad}%
+            </p>
+
+          </div>
+
+          <div className="mt-3">
+
+            <p className="font-medium">
+
+              Alternativas recomendadas:
+
+            </p>
+
+            <div className="flex flex-wrap gap-3 mt-4">
+
+            {
+              horarioIA.horariosAlternativos?.map(
+                (hora,index)=>(
+
+                  <button
+                    key={index}
+                    type="button"
+
+                    onClick={() =>
+                      setForm({
+                        ...form,
+                        horaInicio: hora,
+
+                        horaFin:
+                          `${String(
+                            parseInt(hora.split(":")[0]) + 1
+                          ).padStart(2,"0")}:00`
+                      })
+                    }
+                    className="
+                      px-4
+                      py-2
+                      rounded-full
+                      bg-green-100
+                      text-green-700
+                      font-semibold
+                      hover:bg-green-200
+                      transition
+                    "
+                  >
+                    {hora}
+                  </button>
+
+                )
+              )
+            }
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )
+    }
           {/* BOTON */}
           <button
             onClick={guardar}
@@ -554,17 +912,20 @@ function Reservas() {
               ocupado ||
               errores.length > 0
             }
-            className="
-              bg-green-600
-              hover:bg-green-700
-              disabled:bg-gray-400
-              text-white
-              p-4
-              rounded-xl
-              font-bold
-              shadow-lg
-              transition
-            "
+          className="
+            w-full
+            bg-gradient-to-r
+            from-emerald-500
+            to-green-700
+            text-white
+            p-4
+            rounded-2xl
+            font-bold
+            text-lg
+            shadow-xl
+            hover:scale-[1.02]
+            transition
+          "
           >
 
             Crear Reserva

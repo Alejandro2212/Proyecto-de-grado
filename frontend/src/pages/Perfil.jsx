@@ -1,38 +1,47 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import toast from "react-hot-toast";
 
+import {
+  ArrowLeft,
+  UserCircle2,
+  Mail,
+  Shield,
+  Phone,
+  CreditCard,
+  User
+} from "lucide-react";
+
 export default function Perfil() {
 
-  const [perfil,
-    setPerfil] = useState({
-      nombre: "",
-      apellido: "",
-      email: "",
-      telefono: "",
-      ci: "",
-      rol: ""
-    });
+  const navigate = useNavigate();
 
-  const cargarPerfil =
-    async () => {
+  const [perfil, setPerfil] = useState({
+    nombre: "",
+    apellido: "",
+    email: "",
+    telefono: "",
+    ci: "",
+    rol: ""
+  });
 
-      try {
+  const cargarPerfil = async () => {
 
-        const res =
-          await api.get(
-            "/perfil"
-          );
+    try {
 
-        setPerfil(res.data);
+      const res =
+        await api.get("/perfil");
 
-      } catch {
+      setPerfil(res.data);
 
-        toast.error(
-          "Error al cargar perfil"
-        );
-      }
-    };
+    } catch {
+
+      toast.error(
+        "Error al cargar perfil"
+      );
+    }
+  };
 
   useEffect(() => {
 
@@ -40,157 +49,453 @@ export default function Perfil() {
 
   }, []);
 
-  const guardar =
-    async () => {
+  const guardar = async () => {
 
-      try {
+    try {
 
-        await api.put(
-          "/perfil",
-          {
-            nombre:
-              perfil.nombre,
+      await api.put(
+        "/perfil",
+        {
+          nombre: perfil.nombre,
+          apellido: perfil.apellido,
+          telefono: perfil.telefono,
+          ci: perfil.ci
+        }
+      );
 
-            apellido:
-              perfil.apellido,
+      toast.success(
+        "Perfil actualizado correctamente"
+      );
 
-            telefono:
-              perfil.telefono,
+    } catch {
 
-            ci:
-              perfil.ci
-          }
-        );
-
-        toast.success(
-          "Perfil actualizado"
-        );
-
-      } catch {
-
-        toast.error(
-          "Error al guardar"
-        );
-      }
-    };
+      toast.error(
+        "Error al guardar"
+      );
+    }
+  };
 
   return (
 
-    <div className="p-6">
+    <div className="p-6 max-w-7xl mx-auto">
+
+      {/* BOTÓN VOLVER */}
+
+      <button
+        onClick={() => navigate(-1)}
+        className="
+          flex
+          items-center
+          gap-2
+          mb-6
+          text-blue-600
+          hover:text-blue-800
+          font-semibold
+        "
+      >
+        <ArrowLeft size={20} />
+        Volver
+      </button>
+
+      {/* CABECERA */}
+
+      <div
+        className="
+          bg-gradient-to-r
+          from-slate-900
+          to-slate-700
+          text-white
+          rounded-3xl
+          p-8
+          shadow-xl
+          mb-8
+        "
+      >
+
+        <div className="flex items-center gap-6">
+
+          <UserCircle2 size={90} />
+
+          <div>
+
+            <h1 className="text-4xl font-bold">
+
+              {perfil.nombre} {perfil.apellido}
+
+            </h1>
+
+            <p className="text-slate-300 mt-2">
+              {perfil.email}
+            </p>
+
+            <span
+              className="
+                inline-block
+                mt-4
+                bg-white/20
+                px-4
+                py-2
+                rounded-full
+                text-sm
+                font-semibold
+              "
+            >
+              {perfil.rol}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* ESTADÍSTICAS */}
+
+      <div
+        className="
+          grid
+          grid-cols-1
+          md:grid-cols-3
+          gap-6
+          mb-8
+        "
+      >
+
+        <div
+          className="
+            bg-white
+            rounded-3xl
+            shadow
+            p-6
+          "
+        >
+          <h3 className="text-gray-500">
+            Estado
+          </h3>
+
+          <p className="text-2xl font-bold text-green-600 mt-2">
+            Activo
+          </p>
+        </div>
+
+        <div
+          className="
+            bg-white
+            rounded-3xl
+            shadow
+            p-6
+          "
+        >
+          <h3 className="text-gray-500">
+            Rol
+          </h3>
+
+          <p className="text-2xl font-bold mt-2">
+            {perfil.rol}
+          </p>
+        </div>
+
+        <div
+          className="
+            bg-white
+            rounded-3xl
+            shadow
+            p-6
+          "
+        >
+          <h3 className="text-gray-500">
+            Cuenta
+          </h3>
+
+          <p className="text-2xl font-bold text-blue-600 mt-2">
+            Verificada
+          </p>
+        </div>
+
+      </div>
+
+      {/* FORMULARIO */}
 
       <div
         className="
           bg-white
           rounded-3xl
-          shadow
+          shadow-xl
           p-8
-          max-w-4xl
         "
       >
 
-        <h1
+        {/* DATOS PERSONALES */}
+
+        <h2
           className="
-            text-3xl
+            text-2xl
             font-bold
-            mb-8
+            mb-6
           "
         >
-          Mi Perfil
-        </h1>
+          Información Personal
+        </h2>
 
         <div
           className="
             grid
             md:grid-cols-2
-            gap-5
+            gap-6
           "
         >
 
-          <input
-            value={perfil.nombre}
-            onChange={(e)=>
-              setPerfil({
-                ...perfil,
-                nombre:
-                e.target.value
-              })
-            }
-            placeholder="Nombre"
-            className="border p-3 rounded-xl"
-          />
+          <div>
 
-          <input
-            value={perfil.apellido}
-            onChange={(e)=>
-              setPerfil({
-                ...perfil,
-                apellido:
-                e.target.value
-              })
-            }
-            placeholder="Apellido"
-            className="border p-3 rounded-xl"
-          />
+            <label className="font-medium text-gray-600">
+              Nombre
+            </label>
 
-          <input
-            value={perfil.telefono}
-            onChange={(e)=>
-              setPerfil({
-                ...perfil,
-                telefono:
-                e.target.value
-              })
-            }
-            placeholder="Teléfono"
-            className="border p-3 rounded-xl"
-          />
+            <div className="relative mt-2">
 
-          <input
-            value={perfil.ci}
-            onChange={(e)=>
-              setPerfil({
-                ...perfil,
-                ci:
-                e.target.value
-              })
-            }
-            placeholder="CI"
-            className="border p-3 rounded-xl"
-          />
+              <User
+                size={18}
+                className="
+                  absolute
+                  left-3
+                  top-4
+                  text-gray-400
+                "
+              />
 
-          <input
-            value={perfil.email}
-            disabled
-            className="
-              border
-              p-3
-              rounded-xl
-              bg-gray-100
-            "
-          />
+              <input
+                value={perfil.nombre}
+                onChange={(e) =>
+                  setPerfil({
+                    ...perfil,
+                    nombre: e.target.value
+                  })
+                }
+                className="
+                  w-full
+                  border
+                  rounded-xl
+                  pl-10
+                  p-3
+                "
+              />
 
-          <input
-            value={perfil.rol}
-            disabled
-            className="
-              border
-              p-3
-              rounded-xl
-              bg-gray-100
-            "
-          />
+            </div>
+
+          </div>
+
+          <div>
+
+            <label className="font-medium text-gray-600">
+              Apellido
+            </label>
+
+            <input
+              value={perfil.apellido}
+              onChange={(e) =>
+                setPerfil({
+                  ...perfil,
+                  apellido: e.target.value
+                })
+              }
+              className="
+                w-full
+                border
+                rounded-xl
+                p-3
+                mt-2
+              "
+            />
+
+          </div>
+
+          <div>
+
+            <label className="font-medium text-gray-600">
+              Teléfono
+            </label>
+
+            <div className="relative mt-2">
+
+              <Phone
+                size={18}
+                className="
+                  absolute
+                  left-3
+                  top-4
+                  text-gray-400
+                "
+              />
+
+              <input
+                value={perfil.telefono}
+                onChange={(e) =>
+                  setPerfil({
+                    ...perfil,
+                    telefono: e.target.value
+                  })
+                }
+                className="
+                  w-full
+                  border
+                  rounded-xl
+                  pl-10
+                  p-3
+                "
+              />
+
+            </div>
+
+          </div>
+
+          <div>
+
+            <label className="font-medium text-gray-600">
+              Carnet de Identidad
+            </label>
+
+            <div className="relative mt-2">
+
+              <CreditCard
+                size={18}
+                className="
+                  absolute
+                  left-3
+                  top-4
+                  text-gray-400
+                "
+              />
+
+              <input
+                value={perfil.ci}
+                onChange={(e) =>
+                  setPerfil({
+                    ...perfil,
+                    ci: e.target.value
+                  })
+                }
+                className="
+                  w-full
+                  border
+                  rounded-xl
+                  pl-10
+                  p-3
+                "
+              />
+
+            </div>
+
+          </div>
 
         </div>
+
+        {/* CUENTA */}
+
+        <h2
+          className="
+            text-2xl
+            font-bold
+            mt-10
+            mb-6
+          "
+        >
+          Información de Cuenta
+        </h2>
+
+        <div
+          className="
+            grid
+            md:grid-cols-2
+            gap-6
+          "
+        >
+
+          <div>
+
+            <label className="font-medium text-gray-600">
+              Correo Electrónico
+            </label>
+
+            <div className="relative mt-2">
+
+              <Mail
+                size={18}
+                className="
+                  absolute
+                  left-3
+                  top-4
+                  text-gray-400
+                "
+              />
+
+              <input
+                value={perfil.email}
+                disabled
+                className="
+                  w-full
+                  border
+                  rounded-xl
+                  pl-10
+                  p-3
+                  bg-gray-100
+                "
+              />
+
+            </div>
+
+          </div>
+
+          <div>
+
+            <label className="font-medium text-gray-600">
+              Rol
+            </label>
+
+            <div className="relative mt-2">
+
+              <Shield
+                size={18}
+                className="
+                  absolute
+                  left-3
+                  top-4
+                  text-gray-400
+                "
+              />
+
+              <input
+                value={perfil.rol}
+                disabled
+                className="
+                  w-full
+                  border
+                  rounded-xl
+                  pl-10
+                  p-3
+                  bg-gray-100
+                "
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* BOTÓN */}
 
         <button
           onClick={guardar}
           className="
-            mt-6
+            mt-8
             bg-slate-900
+            hover:bg-slate-800
             text-white
-            px-6
+            px-8
             py-3
             rounded-xl
+            font-semibold
+            transition
           "
         >
           Guardar Cambios
