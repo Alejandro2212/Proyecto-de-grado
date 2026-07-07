@@ -252,11 +252,10 @@ setMensajeIA(
   // =========================
   useEffect(() => {
 
-  const socket =
+const socket =
     new SockJS(
-      "http://192.168.100.231:8080/ws"
+      import.meta.env.VITE_API_URL.replace("/api", "") + "/ws"
     );
-
     const client = new Client({
 
       webSocketFactory: () => socket,
