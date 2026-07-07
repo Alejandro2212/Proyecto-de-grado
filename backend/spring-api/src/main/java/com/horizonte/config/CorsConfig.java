@@ -18,12 +18,13 @@ public class CorsConfig {
         CorsConfiguration config =
                 new CorsConfiguration();
 
-        config.setAllowedOrigins(
-        List.of(
-                "http://localhost:5173",
-                "http://192.168.100.231:5173"
-        )
-        );
+                config.setAllowedOrigins(
+                List.of(
+                        "http://localhost:5173",
+                        "http://192.168.100.231:5173",
+                        "https://capable-flexibility-production-dc3c.up.railway.app"
+                )
+                );
 
         config.setAllowedMethods(
                 List.of(
